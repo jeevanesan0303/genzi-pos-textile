@@ -1,0 +1,2 @@
+import React from 'react';import {renderToStaticMarkup} from 'react-dom/server';import assert from 'node:assert/strict';import DataTable from '../src/components/common/DataTable';
+const html=renderToStaticMarkup(<DataTable><thead><tr><th>Name</th></tr></thead><tbody>{Array.from({length:25},(_,i)=><tr key={i}><td>Record {i+1}</td></tr>)}</tbody></DataTable>);assert.equal((html.match(/<td>/g)||[]).length,10);assert.match(html,/of 25 entries/);assert.match(html,/1 \/ 3/);console.log('PASS 25 records produce 10 visible rows and 3 pages');

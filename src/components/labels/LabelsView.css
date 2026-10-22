@@ -1,0 +1,106 @@
+.gz-labels .settings-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.gz-labels .panel {
+  min-width: 0;
+}
+
+.gz-labels label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.gz-labels input,
+.gz-labels select {
+  width: 100%;
+  min-width: 0;
+}
+
+.gz-labels button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.gz-labels button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.gz-labels .panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.gz-labels .list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border, #dce0e8);
+}
+
+.gz-labels .list-item > div {
+  min-width: 0;
+}
+
+.gz-labels .list-item small {
+  display: block;
+  margin-top: 4px;
+}
+
+.gz-labels-product-details {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid var(--border, #dce0e8);
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.gz-labels-error {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid #ef4444;
+  border-radius: 10px;
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.gz-labels-preview-title {
+  margin-top: 24px;
+}
+
+.gz-labels-previews {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  overflow: auto;
+  border-radius: 12px;
+  background: rgba(128, 128, 128, 0.1);
+}
+
+.gz-labels-previews .gz-label-sticker {
+  flex-shrink: 0;
+  outline: 1px solid #d1d5db;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 850px) {
+  .gz-labels .settings-layout {
+    grid-template-columns: 1fr;
+  }
+}

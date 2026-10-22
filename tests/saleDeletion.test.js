@@ -1,0 +1,4 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {deleteLocalSale} from '../src/saleDeletion.js';
+test('delete receipt restores only units still sold after partial return',()=>{const d={products:[{id:'p',stock:8}],sales:[{id:'s',sync:'pending',items:[{id:'p',qty:5}],returns:[{items:[{id:'p',qty:2}],total:20}]}]};const n=deleteLocalSale(d,'s');assert.equal(n.products[0].stock,11);assert.equal(n.sales.length,0);assert.equal(d.products[0].stock,8)});
+test('delete fully returned receipt never restores stock twice',()=>{assert.equal(deleteLocalSale({products:[{id:'p',stock:10}],sales:[{id:'s',returned:true,items:[{id:'p',qty:5}]}]},'s').products[0].stock,10)});
+test('synced sale cannot be deleted only locally',()=>{assert.throws(()=>deleteLocalSale({products:[],sales:[{id:'s',sync:'synced'}]},'s'),/backend/)});

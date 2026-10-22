@@ -1,0 +1,11 @@
+import React from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import CatalogueTools from '../src/components/products/CatalogueTools';
+import InventoryView from '../src/components/inventory/InventoryView';
+import {seed,money} from '../src/domain';
+const data=structuredClone(seed);data.stockMovements=[{id:'m1',date:new Date().toISOString(),sku:'DR001',before:15,after:11,reason:'Physical count',user:'Manager'}];
+const html=renderToStaticMarkup(<InventoryView title={()=>null} data={data} table={()=>null} money={money} adjustStock={()=>{}}/>);
+if(!html.includes('Physical count')||!html.includes('Replenishment planner'))throw Error('Inventory rendering failed');
+const tools=renderToStaticMarkup(<CatalogueTools products={data.products} filters={{size:'All',colour:'All',stock:'All'}} setFilters={()=>{}} exportProducts={()=>{}}/>);
+if(!tools.includes('Out of stock')||!tools.includes('Export catalogue'))throw Error('Filters rendering failed');
+console.log('PASS advanced stock history, replenishment and filter component rendering');

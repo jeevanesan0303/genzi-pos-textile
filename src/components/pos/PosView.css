@@ -1,0 +1,1182 @@
+/* =========================
+   GEN ZI CORNER · POS DESIGN
+   ========================= */
+
+.gzpos,
+.gzpos-dialog {
+  --pos-purple: #7542df;
+  --pos-purple-dark: #5826b6;
+  --pos-soft: var(--hover, #f5f0ff);
+  --pos-bg: var(--panel, #ffffff);
+  --pos-fg: var(--text, #282239);
+  --pos-muted: var(--muted, #827990);
+  --pos-line: var(--line, #e8e2f0);
+}
+
+.gzpos,
+.gzpos *,
+.gzpos-dialog,
+.gzpos-dialog * {
+  box-sizing: border-box;
+}
+
+.gzpos {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: var(--pos-height, 680px);
+  color: var(--pos-fg);
+}
+
+.gzpos h1,
+.gzpos h2,
+.gzpos h3,
+.gzpos-dialog h2 {
+  margin: 0;
+  color: var(--pos-fg);
+  line-height: 1.3;
+}
+
+.gzpos h1 {
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+}
+
+.gzpos h2 {
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.4px;
+}
+
+.gzpos h3 {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.gzpos small {
+  color: var(--pos-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+/* Buttons */
+
+.gzpos button,
+.gzpos-dialog button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  margin: 0;
+  padding: 9px 13px;
+  border: 1px solid var(--pos-line);
+  border-radius: 11px;
+  background: var(--pos-bg);
+  color: var(--pos-fg);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.gzpos button svg,
+.gzpos-dialog button svg {
+  flex-shrink: 0;
+}
+
+.gzpos button:hover:not(:disabled),
+.gzpos-dialog button:hover:not(:disabled) {
+  border-color: #b69ae8;
+  background: var(--pos-soft);
+  transform: none;
+  filter: none;
+}
+
+.gzpos button:disabled,
+.gzpos-dialog button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.gzpos button:focus-visible,
+.gzpos-dialog button:focus-visible {
+  outline: 3px solid #b79aee;
+  outline-offset: 3px;
+}
+
+.gzpos .gzpos-primary,
+.gzpos-dialog .gzpos-primary {
+  border-color: var(--pos-purple);
+  background: linear-gradient(115deg, #8550e8, #6830ce);
+  color: #fff;
+  font-weight: 750;
+  box-shadow: 0 5px 14px #7542df20;
+}
+
+.gzpos .gzpos-primary:hover:not(:disabled),
+.gzpos-dialog .gzpos-primary:hover:not(:disabled) {
+  border-color: var(--pos-purple-dark);
+  background: linear-gradient(115deg, #7943db, #5923ba);
+  color: #fff;
+  box-shadow: 0 7px 18px #7542df30;
+}
+
+/* Fields */
+
+.gzpos label,
+.gzpos-dialog label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  margin: 0;
+  color: var(--pos-fg);
+  font-size: 12px;
+  font-weight: 650;
+  text-align: left;
+}
+
+.gzpos input,
+.gzpos select,
+.gzpos-dialog input,
+.gzpos-dialog select {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--pos-line);
+  border-radius: 11px;
+  background: var(--pos-bg);
+  color: var(--pos-fg);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  box-shadow: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.gzpos input::placeholder,
+.gzpos-dialog input::placeholder {
+  color: var(--pos-muted);
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+.gzpos input:focus,
+.gzpos select:focus,
+.gzpos-dialog input:focus,
+.gzpos-dialog select:focus {
+  border-color: #a47bE8;
+  outline: none;
+  box-shadow: 0 0 0 3px #7542df12;
+}
+
+/* Page header */
+
+.gzpos-top,
+.gzpos-section,
+.gzpos-cart-title,
+.gzpos-pagination,
+.gzpos-dialog-head,
+.gzpos-receipt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gzpos-top {
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.gzpos-top > div:first-child {
+  min-width: 0;
+}
+
+.gzpos-top > div:first-child > small {
+  display: block;
+  margin-top: 5px;
+}
+
+.gzpos-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Main layout
+   Minimum height prevents the summary controls from being clipped.
+   Short screens use normal page scrolling. */
+
+.gzpos-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 18px;
+  min-width: 0;
+  height: max(660px, calc(var(--pos-height, 740px) - 80px));
+  flex: none;
+  align-items: stretch;
+}
+
+.gzpos-panel {
+  min-width: 0;
+  min-height: 0;
+  padding: 20px;
+  border: 1px solid var(--pos-line);
+  border-radius: 22px;
+  background: var(--pos-bg);
+  box-shadow: 0 8px 30px #33204d06;
+}
+
+/* Catalogue */
+
+.gzpos-catalogue {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  overflow: hidden;
+}
+
+.gzpos-scan {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--pos-line);
+  border-radius: 15px;
+  background: var(--pos-soft);
+}
+
+.gzpos-scan label {
+  flex: 1;
+}
+
+.gzpos-scan input {
+  background: var(--pos-bg);
+}
+
+.gzpos-scan button {
+  height: 42px;
+}
+
+.gzpos-notice {
+  display: block;
+  min-height: 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gzpos-section {
+  flex-shrink: 0;
+}
+
+.gzpos-section > h2 {
+  font-size: 17px;
+}
+
+.gzpos-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 160px;
+  gap: 10px;
+}
+
+.gzpos-products {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--pos-line);
+  border-radius: 13px;
+}
+
+.gzpos-products table {
+  width: 100%;
+  min-width: 510px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+}
+
+.gzpos-products th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 13px 12px;
+  border-bottom: 1px solid var(--pos-line);
+  background: var(--pos-bg);
+  color: var(--pos-muted);
+  font-size: 10px;
+  font-weight: 750;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.55px;
+  white-space: nowrap;
+}
+
+.gzpos-products td {
+  padding: 15px 12px;
+  border-bottom: 1px solid var(--pos-line);
+  vertical-align: middle;
+  line-height: 1.6;
+}
+
+.gzpos-products tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.gzpos-products tbody tr:hover {
+  background: var(--pos-soft);
+}
+
+.gzpos-products td strong,
+.gzpos-products td small {
+  display: block;
+}
+
+.gzpos-products td strong {
+  margin: 2px 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.gzpos-products td:first-child {
+  max-width: 260px;
+  overflow-wrap: anywhere;
+}
+
+.gzpos-products td:nth-child(4) {
+  font-weight: 650;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.gzpos-products td:last-child button {
+  width: 35px;
+  min-height: 35px;
+  padding: 0;
+  border-color: transparent;
+  background: var(--pos-soft);
+  color: var(--pos-purple);
+}
+
+.gzpos-products > p {
+  padding: 16px;
+  font-size: 12px;
+  color: var(--pos-muted);
+}
+
+.gzpos-stock-out {
+  color: #c44255 !important;
+}
+
+.gzpos-pagination {
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.gzpos-pagination > div {
+  display: flex;
+  gap: 7px;
+}
+
+.gzpos-pagination button {
+  min-height: 34px;
+  padding: 7px 12px;
+  font-size: 11px;
+}
+
+/* Order summary */
+
+.gzpos-summary {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: visible;
+  border-top: 3px solid var(--pos-purple);
+  background: var(--pos-bg);
+}
+
+/* Prevent headings, customer fields, totals and buttons from shrinking. */
+.gzpos-summary > :not(.gzpos-cart) {
+  flex-shrink: 0;
+}
+
+.gzpos-summary-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 2px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--pos-line);
+}
+
+.gzpos-summary-heading h2 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.gzpos-summary-heading h2 small {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.gzpos-summary .gzpos-new-customer-button {
+  min-height: 33px;
+  padding: 7px 10px;
+  border-color: #b59ae34d;
+  background: var(--pos-soft);
+  color: var(--pos-purple);
+  font-size: 11px;
+}
+
+.gzpos-summary > label {
+  gap: 7px;
+}
+
+.gzpos-summary > small {
+  display: block;
+  margin-top: -5px;
+  font-size: 11px;
+}
+
+.gzpos-customer-warning {
+  color: #ad711d !important;
+}
+
+.gzpos-summary > .gzpos-section {
+  padding-top: 2px;
+}
+
+.gzpos-summary > .gzpos-section h3 {
+  font-size: 13px;
+}
+
+.gzpos-summary > .gzpos-section button {
+  min-height: 29px;
+  padding: 5px 10px;
+  border-color: transparent;
+  background: var(--pos-soft);
+  color: var(--pos-muted);
+  font-size: 11px;
+}
+
+/* Only cart items scroll inside the summary. */
+
+.gzpos-cart {
+  flex: 1 1 160px;
+  min-height: 100px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 0 5px 0 0;
+  border-top: 1px solid var(--pos-line);
+  border-bottom: 1px solid var(--pos-line);
+}
+
+.gzpos-cart article {
+  padding: 14px 1px;
+  border-bottom: 1px solid var(--pos-line);
+}
+
+.gzpos-cart article:last-child {
+  border-bottom: 0;
+}
+
+.gzpos-cart-title {
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.gzpos-cart-title > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.gzpos-cart-title strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.gzpos-cart-title small {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+}
+
+.gzpos-cart-title > button {
+  flex-shrink: 0;
+  width: 29px;
+  min-height: 29px;
+  padding: 0;
+  border-color: transparent;
+  border-radius: 8px;
+  background: #dc496010;
+  color: #c44357;
+}
+
+.gzpos-cart-title > button:hover:not(:disabled) {
+  border-color: #dc496040;
+  background: #dc49601c;
+}
+
+.gzpos-cart-bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.2fr);
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 10px;
+}
+
+.gzpos-cart-bottom > span {
+  color: var(--pos-muted);
+}
+
+.gzpos-cart-bottom > b {
+  min-width: 0;
+  font-size: 12px;
+  text-align: right;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.gzpos-qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  padding: 3px;
+  border: 1px solid var(--pos-line);
+  border-radius: 10px;
+  background: var(--pos-bg);
+}
+
+.gzpos-qty button {
+  width: 27px;
+  height: 27px;
+  min-height: 27px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: var(--pos-soft);
+  color: var(--pos-purple);
+}
+
+.gzpos-qty span {
+  min-width: 27px;
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 750;
+  text-align: center;
+}
+
+.gzpos-cart article > .gzpos-stock-out {
+  display: block;
+  margin-top: 8px;
+}
+
+/* Totals */
+
+.gzpos-totals {
+  display: grid;
+  gap: 10px;
+  padding-top: 2px;
+  font-size: 12px;
+}
+
+.gzpos-totals > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gzpos-totals > div > :last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.gzpos-totals > label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 115px;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.gzpos-totals input {
+  width: 100%;
+  height: 35px;
+  text-align: right;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.gzpos-totals .gzpos-grand {
+  gap: 12px;
+  margin-top: 2px;
+  padding: 13px 14px;
+  border: 1px solid #b496e54d;
+  border-radius: 13px;
+  background: var(--pos-soft);
+  color: var(--pos-fg);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+}
+
+.gzpos-grand > :last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Payment and hold buttons */
+
+.gzpos-checkout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px;
+  gap: 9px;
+  padding-top: 1px;
+}
+
+.gzpos-checkout button {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  height: auto;
+  padding: 12px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.4;
+  white-space: normal;
+}
+
+.gzpos-checkout > button:last-child {
+  background: var(--pos-bg);
+  border-color: var(--pos-line);
+}
+
+/* Messages and empty state */
+
+.gzpos-alert {
+  flex-shrink: 0;
+  padding: 12px 14px;
+  border: 1px solid #edc5cd;
+  border-radius: 12px;
+  background: #fff2f5;
+  color: #a8334b;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.gzpos-pending {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 12px 14px;
+  border: 1px solid #e6c47b;
+  border-radius: 12px;
+  background: #fff8e7;
+  color: #805a19;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.gzpos-empty {
+  display: grid;
+  place-content: center;
+  min-height: 140px;
+  height: 100%;
+  padding: 20px;
+  text-align: center;
+  color: var(--pos-muted);
+}
+
+.gzpos-empty svg {
+  margin: 0 auto;
+  color: #ad94ce;
+}
+
+.gzpos-empty p {
+  margin: 12px 0 0;
+  color: var(--pos-muted);
+  font-size: 12px;
+}
+
+/* Scrollbars */
+
+.gzpos-products,
+.gzpos-cart,
+.gzpos-dialog {
+  scrollbar-width: thin;
+  scrollbar-color: #c4b1df transparent;
+}
+
+.gzpos-products::-webkit-scrollbar,
+.gzpos-cart::-webkit-scrollbar,
+.gzpos-dialog::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.gzpos-products::-webkit-scrollbar-thumb,
+.gzpos-cart::-webkit-scrollbar-thumb,
+.gzpos-dialog::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #c4b1df;
+}
+
+.gzpos-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Dialogs */
+
+.gzpos-dialog {
+  width: min(480px, 94vw);
+  max-height: 90dvh;
+  margin: auto;
+  padding: 24px;
+  overflow: auto;
+  border: 1px solid var(--pos-line);
+  border-radius: 22px;
+  background: var(--pos-bg);
+  color: var(--pos-fg);
+  box-shadow: 0 25px 90px #160e3640;
+}
+
+.gzpos-dialog.wide {
+  width: min(760px, 94vw);
+}
+
+.gzpos-dialog::backdrop {
+  background: #21133180;
+  backdrop-filter: blur(5px);
+}
+
+.gzpos-dialog-head {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--pos-line);
+}
+
+.gzpos-dialog-head h2 {
+  font-size: 19px;
+  font-weight: 750;
+  letter-spacing: -0.4px;
+}
+
+.gzpos-dialog-head > button {
+  flex-shrink: 0;
+  width: 33px;
+  min-height: 33px;
+  padding: 0;
+  background: var(--pos-soft);
+}
+
+.gzpos-dialog fieldset {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.gzpos-dialog p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.gzpos-dialog .gzpos-alert {
+  margin: 12px 0;
+}
+
+.gzpos-payment-total {
+  margin: 12px 0 22px;
+  color: var(--pos-purple);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Held / completed bill list */
+
+.gzpos-bills {
+  display: grid;
+  gap: 11px;
+}
+
+.gzpos-bills article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 15px;
+  border: 1px solid var(--pos-line);
+  border-radius: 13px;
+  background: var(--pos-bg);
+}
+
+.gzpos-bills article > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.gzpos-bills article small {
+  display: block;
+  margin: 5px 0;
+  color: var(--pos-muted);
+  font-size: 11px;
+}
+
+/* Receipt preview */
+
+.gzpos-receipt {
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px dashed var(--pos-line);
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.gzpos-receipt h3 {
+  margin: 0;
+}
+
+.gzpos-receipt-row {
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--pos-line);
+}
+
+.gzpos-receipt-row small {
+  display: block;
+  color: var(--pos-muted);
+}
+
+/* New customer dialog */
+
+.gzpos-new-customer-form {
+  display: grid;
+  gap: 17px;
+}
+
+.gzpos-new-customer-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.gzpos-new-customer-form > small {
+  margin-top: -8px;
+  color: var(--pos-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.gzpos-new-customer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 5px;
+}
+
+.gzpos-new-customer-form .gzpos-error {
+  margin: 0;
+  padding: 11px 13px;
+  border: 1px solid #edc5cd;
+  border-radius: 10px;
+  background: #fff2f5;
+  color: #a8334b;
+}
+
+/* Large desktop */
+
+@media (min-width: 1550px) {
+  .gzpos-layout {
+    grid-template-columns: minmax(0, 1fr) 440px;
+    gap: 22px;
+  }
+
+  .gzpos-panel {
+    padding: 23px;
+  }
+
+  .gzpos-products td {
+    padding: 17px 14px;
+  }
+
+  .gzpos-summary-heading h2 {
+    font-size: 20px;
+  }
+
+  .gzpos-totals .gzpos-grand {
+    font-size: 25px;
+  }
+}
+
+/* Compact desktop */
+
+@media (min-width: 801px) and (max-width: 1150px) {
+  .gzpos-layout {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 13px;
+    height: max(680px, calc(var(--pos-height, 760px) - 80px));
+  }
+
+  .gzpos-panel {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .gzpos-filters {
+    grid-template-columns: minmax(0, 1fr) 125px;
+  }
+
+  .gzpos-catalogue > .gzpos-section {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+
+  .gzpos-catalogue > .gzpos-section button {
+    font-size: 10px;
+  }
+
+  .gzpos-summary-heading h2 {
+    font-size: 17px;
+  }
+
+  .gzpos-checkout {
+    grid-template-columns: minmax(0, 1fr) 100px;
+  }
+
+  .gzpos-checkout button {
+    font-size: 11px;
+  }
+
+  .gzpos-cart-bottom {
+    gap: 5px;
+  }
+
+  .gzpos-cart-bottom > b {
+    font-size: 11px;
+  }
+
+  .gzpos-qty button {
+    width: 24px;
+    height: 26px;
+    min-height: 26px;
+  }
+
+  .gzpos-qty span {
+    min-width: 23px;
+  }
+}
+
+/* Tablet / mobile */
+
+@media (max-width: 800px) {
+  .gzpos {
+    min-height: 0;
+    gap: 14px;
+  }
+
+  .gzpos-top {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .gzpos-actions {
+    width: 100%;
+  }
+
+  .gzpos-actions button {
+    flex: 1;
+  }
+
+  .gzpos-layout {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    gap: 16px;
+  }
+
+  .gzpos-panel {
+    padding: 17px;
+    border-radius: 18px;
+  }
+
+  .gzpos-catalogue {
+    height: 560px;
+  }
+
+  .gzpos-summary {
+    height: auto;
+    min-height: 620px;
+    overflow: visible;
+  }
+
+  .gzpos-cart {
+    flex: 1 1 auto;
+    min-height: 140px;
+    max-height: 340px;
+  }
+
+  .gzpos-summary-heading {
+    flex-wrap: wrap;
+  }
+
+  .gzpos-summary-heading h2 {
+    font-size: 19px;
+  }
+
+  .gzpos-totals .gzpos-grand {
+    font-size: 24px;
+  }
+
+  .gzpos-checkout button {
+    min-height: 49px;
+  }
+
+  .gzpos input,
+  .gzpos select,
+  .gzpos-dialog input,
+  .gzpos-dialog select {
+    font-size: 16px;
+  }
+
+  .gzpos-pending {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .gzpos h1 {
+    font-size: 23px;
+  }
+
+  .gzpos-scan {
+    flex-wrap: wrap;
+    padding: 12px;
+  }
+
+  .gzpos-scan label {
+    flex-basis: 100%;
+  }
+
+  .gzpos-scan button {
+    width: 100%;
+  }
+
+  .gzpos-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gzpos-catalogue {
+    height: 620px;
+  }
+
+  .gzpos-catalogue > .gzpos-section {
+    flex-wrap: wrap;
+  }
+
+  .gzpos-catalogue > .gzpos-section button {
+    min-height: 32px;
+    font-size: 10px;
+  }
+
+  .gzpos-pagination {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .gzpos-pagination button {
+    padding: 7px 10px;
+  }
+
+  .gzpos-bills article {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .gzpos-dialog {
+    padding: 19px;
+    border-radius: 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  .gzpos-panel {
+    padding: 14px;
+  }
+
+  .gzpos-summary-heading h2 {
+    font-size: 17px;
+  }
+
+  .gzpos-cart-bottom {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .gzpos-cart-bottom > b {
+    grid-column: 1 / -1;
+  }
+
+  .gzpos-checkout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gzpos-totals .gzpos-grand {
+    font-size: 21px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gzpos *,
+  .gzpos-dialog * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
