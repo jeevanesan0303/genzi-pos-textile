@@ -7,6 +7,284 @@ import ReceiptFooter from "./ReceiptFooter";
 import { refundTotal } from "../../returns";
 import { returnStatus } from "../../exchange";
 
+/* ==========================================
+   GEN ZI CORNER - RECEIPT PRINT STYLES
+========================================== */
+
+const createPrintStyles = (width) => `
+  @page {
+    size: ${width}mm 200mm;
+    margin: 0;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    width: ${width}mm;
+    min-height: 0;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    background: #ffffff;
+    color: #000000;
+  }
+
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .gz-receipt {
+    width: ${width}mm;
+    max-width: ${width}mm;
+    margin: 0;
+    padding: 3mm;
+    background: #ffffff;
+    color: #000000;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  .gz-receipt h2 {
+    margin: 3px 0 2px;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+  }
+
+  .gz-receipt p {
+    margin: 2px 0;
+    line-height: 1.25;
+  }
+
+  .gz-receipt .gr-center {
+    text-align: center;
+  }
+
+  .gz-receipt .gr-logo {
+    display: block;
+    width: 42px;
+    max-height: 42px;
+    height: auto;
+    object-fit: contain;
+    margin: 0 auto 3px;
+  }
+
+  .gz-receipt hr {
+    border: 0;
+    border-top: 1px dashed #000;
+    margin: 4px 0;
+  }
+
+  .gz-receipt .gr-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 6px;
+    width: 100%;
+    margin: 3px 0;
+  }
+
+  .gz-receipt .gr-row > :first-child {
+    flex: 0 1 45%;
+    min-width: 0;
+  }
+
+  .gz-receipt .gr-row > :last-child {
+    flex: 1 1 55%;
+    min-width: 0;
+    text-align: right;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .gz-receipt table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    table-layout: fixed;
+    font-size: 10px;
+  }
+
+  .gz-receipt th,
+  .gz-receipt td {
+    padding: 2px 1px;
+    vertical-align: top;
+  }
+
+  .gz-receipt th {
+    text-align: right;
+    font-weight: 700;
+    border-bottom: 1px dashed #000;
+  }
+
+  .gz-receipt th:first-child,
+  .gz-receipt td:first-child {
+    text-align: left;
+  }
+
+  .gz-receipt .gr-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .gz-receipt .gr-product {
+    padding: 3px 1px 1px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  .gz-receipt .gr-code {
+    font-family: monospace;
+    font-size: 9px;
+    margin-right: 4px;
+  }
+
+  .gz-receipt .gr-name {
+    font-weight: 500;
+    margin-right: 4px;
+  }
+
+  .gz-receipt .gr-variant {
+    font-size: 9px;
+  }
+
+  .gz-receipt .gr-values td {
+    text-align: right;
+    border-bottom: 1px dotted #aaa;
+    padding-bottom: 3px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .gz-receipt .gr-values td:first-child {
+    text-align: left;
+  }
+
+  .gz-receipt .gr-total {
+    border-top: 1px dashed #000;
+    border-bottom: 1px dashed #000;
+    padding: 5px 0;
+    margin: 5px 0;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .gz-receipt-footer {
+    text-align: center;
+    margin: 3px 0 0;
+    padding: 0;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .gz-receipt-footer p {
+    margin: 2px 0;
+    line-height: 1.2;
+  }
+
+  .gz-receipt-footer .gz-footer-policy {
+    margin: 3px 0;
+    font-size: 9px;
+  }
+
+  .gz-receipt-footer .gz-footer-follow {
+    margin: 3px 0 2px;
+    font-size: 9px;
+  }
+
+  .gz-receipt-footer .gz-footer-qr {
+    display: block;
+    width: 25mm;
+    height: 25mm;
+    max-width: 100%;
+    object-fit: contain;
+    background: #fff;
+    padding: 1mm;
+    margin: 0 auto;
+  }
+
+  .gz-receipt-footer .gz-footer-instagram {
+    margin: 2px 0 0;
+    font-size: 9px;
+    overflow-wrap: anywhere;
+  }
+
+  .gz-receipt-footer:not(:has(.gz-footer-qr)) img {
+    max-width: 25mm;
+    max-height: 25mm;
+    margin: 0 auto;
+  }
+
+  .gz-receipt-footer > p {
+    margin: 2px 0;
+  }
+
+  .gz-receipt-footer > img {
+    display: block;
+    width: 25mm !important;
+    height: 25mm !important;
+    padding: 1mm !important;
+    margin: 0 auto !important;
+    object-fit: contain;
+  }
+
+  .gr-no-print {
+    display: none !important;
+  }
+
+  @media print {
+    @page {
+      size: ${width}mm 200mm;
+      margin: 0;
+    }
+
+    html,
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: ${width}mm !important;
+      height: auto !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+    }
+
+    .gz-receipt {
+      position: static !important;
+      width: ${width}mm !important;
+      max-width: ${width}mm !important;
+      margin: 0 !important;
+      padding: 3mm !important;
+      box-shadow: none !important;
+      border: none !important;
+      transform: none !important;
+    }
+
+    .gr-item,
+    .gz-receipt-footer {
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+    }
+
+    .gr-no-print {
+      display: none !important;
+    }
+  }
+`;
+
+/* ==========================================
+   RECEIPT MODAL
+========================================== */
+
 export default function ReceiptModal({
   close,
   data,
@@ -19,10 +297,12 @@ export default function ReceiptModal({
   const [cashError, setCashError] = useState("");
   const [saving, setSaving] = useState(false);
   const [printError, setPrintError] = useState("");
+  const [printing, setPrinting] = useState(false);
 
   const receiptRef = useRef(null);
   const printLock = useRef(false);
   const autoPrintedSale = useRef(null);
+  const printFrameRef = useRef(null);
 
   const sale = modal.sale;
 
@@ -90,6 +370,10 @@ export default function ReceiptModal({
         ? Math.max(0, cashReceived - cashPortion)
         : null;
 
+  /* ==========================================
+     PRODUCT HELPERS
+  ========================================== */
+
   const getProduct = (item) => {
     const id =
       item.productId ??
@@ -99,7 +383,8 @@ export default function ReceiptModal({
     if (id == null) return undefined;
 
     return products.find(
-      (product) => String(product.id) === String(id)
+      (product) =>
+        String(product.id) === String(id)
     );
   };
 
@@ -115,63 +400,28 @@ export default function ReceiptModal({
     ).trim();
   };
 
-  const waitForImages = async () => {
-    const images = Array.from(
-      receiptRef.current?.querySelectorAll("img") || []
-    );
+  /* ==========================================
+     REMOVE PREVIOUS PRINT FRAME
+  ========================================== */
 
-    await Promise.all(
-      images.map(
-        (image) =>
-          new Promise((resolve, reject) => {
-            if (image.complete) {
-              if (image.naturalWidth > 0) {
-                resolve();
-              } else {
-                reject(
-                  new Error(
-                    "A receipt image could not load."
-                  )
-                );
-              }
-              return;
-            }
+  const removePrintFrame = () => {
+    const frame = printFrameRef.current;
 
-            const timer = setTimeout(() => {
-              cleanup();
-              reject(
-                new Error(
-                  "Receipt images took too long to load."
-                )
-              );
-            }, 10000);
-
-            function cleanup() {
-              clearTimeout(timer);
-              image.removeEventListener("load", loaded);
-              image.removeEventListener("error", failed);
-            }
-
-            function loaded() {
-              cleanup();
-              resolve();
-            }
-
-            function failed() {
-              cleanup();
-              reject(
-                new Error(
-                  "A receipt image could not load."
-                )
-              );
-            }
-
-            image.addEventListener("load", loaded);
-            image.addEventListener("error", failed);
-          })
-      )
-    );
+    if (frame) {
+      frame.remove();
+      printFrameRef.current = null;
+    }
   };
+
+  useEffect(() => {
+    return () => {
+      removePrintFrame();
+    };
+  }, []);
+
+  /* ==========================================
+     PRINT ONLY THE RECEIPT
+  ========================================== */
 
   const printCurrentReceipt = async (
     isActive = () => true
@@ -180,17 +430,172 @@ export default function ReceiptModal({
 
     printLock.current = true;
     setPrintError("");
+    setPrinting(true);
 
     try {
-      await waitForImages();
+      const receiptElement = receiptRef.current;
 
-      if (document.fonts?.ready) {
-        await document.fonts.ready;
+      if (!receiptElement) {
+        throw new Error(
+          "Receipt content is not available."
+        );
       }
 
-      if (isActive()) {
-        window.print();
+      removePrintFrame();
+
+      const frame = document.createElement("iframe");
+
+      frame.setAttribute(
+        "title",
+        "Gen Zi Corner receipt print"
+      );
+
+      frame.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      frame.style.position = "fixed";
+      frame.style.width = "0";
+      frame.style.height = "0";
+      frame.style.border = "0";
+      frame.style.opacity = "0";
+      frame.style.pointerEvents = "none";
+
+      document.body.appendChild(frame);
+      printFrameRef.current = frame;
+
+      const printDocument =
+        frame.contentDocument ||
+        frame.contentWindow?.document;
+
+      if (!printDocument) {
+        throw new Error(
+          "Unable to create receipt print document."
+        );
       }
+
+      const receiptHtml = receiptElement.outerHTML;
+
+      printDocument.open();
+
+      printDocument.write(`
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="UTF-8" />
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1"
+            />
+            <title>Gen Zi Corner Receipt</title>
+            <base href="${document.baseURI.replace(/"/g, "&quot;")}" />
+            <style>
+              ${createPrintStyles(receiptWidth)}
+            </style>
+          </head>
+
+          <body>
+            ${receiptHtml}
+          </body>
+        </html>
+      `);
+
+      printDocument.close();
+
+      const images = Array.from(
+        printDocument.images || []
+      );
+
+      await Promise.all(
+        images.map(
+          (image) =>
+            new Promise((resolve, reject) => {
+              if (image.complete) {
+                if (image.naturalWidth > 0) {
+                  resolve();
+                } else {
+                  reject(
+                    new Error(
+                      "A receipt image could not load."
+                    )
+                  );
+                }
+                return;
+              }
+
+              const timeout = setTimeout(() => {
+                cleanup();
+                reject(
+                  new Error(
+                    "Receipt image loading timed out."
+                  )
+                );
+              }, 10000);
+
+              const cleanup = () => {
+                clearTimeout(timeout);
+                image.removeEventListener(
+                  "load",
+                  loaded
+                );
+                image.removeEventListener(
+                  "error",
+                  failed
+                );
+              };
+
+              const loaded = () => {
+                cleanup();
+                resolve();
+              };
+
+              const failed = () => {
+                cleanup();
+                reject(
+                  new Error(
+                    "A receipt image could not load."
+                  )
+                );
+              };
+
+              image.addEventListener(
+                "load",
+                loaded
+              );
+
+              image.addEventListener(
+                "error",
+                failed
+              );
+            })
+        )
+      );
+
+      if (printDocument.fonts?.ready) {
+        await printDocument.fonts.ready;
+      }
+
+      if (!isActive()) {
+        removePrintFrame();
+        return;
+      }
+
+      const printWindow = frame.contentWindow;
+
+      if (!printWindow) {
+        throw new Error(
+          "Unable to access the receipt print window."
+        );
+      }
+
+      printWindow.focus();
+      printWindow.print();
+
+      // Keep the frame alive until the print
+      // dialog has finished. A later print or
+      // component unmount removes the frame.
+
     } catch (error) {
       if (isActive()) {
         setPrintError(
@@ -198,10 +603,17 @@ export default function ReceiptModal({
             "Unable to prepare receipt for printing."
         );
       }
+
+      removePrintFrame();
     } finally {
       printLock.current = false;
+      setPrinting(false);
     }
   };
+
+  /* ==========================================
+     AUTO PRINT
+  ========================================== */
 
   useEffect(() => {
     if (!autoPrint) return;
@@ -230,6 +642,10 @@ export default function ReceiptModal({
     };
   }, [autoPrint, sale.id, sale.number]);
 
+  /* ==========================================
+     SAVE MISSING CASH DETAILS
+  ========================================== */
+
   const saveCash = async (event) => {
     event.preventDefault();
     setCashError("");
@@ -251,7 +667,9 @@ export default function ReceiptModal({
 
     try {
       setSaving(true);
+
       await onUpdateCash(sale, amount);
+
       setReceived("");
     } catch (error) {
       setCashError(
@@ -263,269 +681,216 @@ export default function ReceiptModal({
     }
   };
 
+  /* ==========================================
+     RECEIPT UI
+  ========================================== */
+
   return (
     <Modal title="Receipt preview" close={close}>
-      <style>{`
-        .gz-receipt {
-          box-sizing: border-box;
-          width: ${receiptWidth}mm;
-          max-width: 100%;
-          margin: 0 auto;
-          padding: 3mm;
-          background: #fff !important;
-          color: #000 !important;
-          color-scheme: light;
-          font-family: Arial, sans-serif;
-          font-size: 10px;
-          line-height: 1.2;
-          overflow-wrap: anywhere;
-        }
-
-        .gz-receipt *,
-        .gz-receipt *::before,
-        .gz-receipt *::after {
-          box-sizing: border-box;
-        }
-
-        .gz-receipt h2 {
-          margin: 3px 0 2px;
-          font-size: 16px;
-          font-weight: 700;
-          line-height: 1.1;
-          text-align: center;
-          color: #000 !important;
-        }
-
-        .gz-receipt p {
-          margin: 2px 0;
-          line-height: 1.2;
-        }
-
-        .gz-receipt .gr-center {
-          text-align: center;
-        }
-
-        .gz-receipt .gr-logo {
-          display: block;
-          width: 42px;
-          height: auto;
-          max-height: 42px;
-          object-fit: contain;
-          margin: 0 auto 3px;
-        }
-
-        .gz-receipt hr {
-          border: 0;
-          border-top: 1px dashed #000;
-          margin: 4px 0;
-        }
-
-        .gz-receipt .gr-row {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 6px;
-          margin: 3px 0;
-          width: 100%;
-        }
-
-        .gz-receipt .gr-row > :first-child {
-          flex: 0 1 45%;
-          min-width: 0;
-        }
-
-        .gz-receipt .gr-row > :last-child {
-          flex: 1 1 55%;
-          min-width: 0;
-          text-align: right;
-          overflow-wrap: anywhere;
-          font-variant-numeric: tabular-nums;
-        }
-
-        .gz-receipt table {
-          width: 100%;
-          border-collapse: collapse;
-          border-spacing: 0;
-          table-layout: fixed;
-          color: #000 !important;
-          font-size: 10px;
-        }
-
-        .gz-receipt th,
-        .gz-receipt td {
-          padding: 2px 1px;
-          vertical-align: top;
-          color: #000 !important;
-        }
-
-        .gz-receipt th {
-          text-align: right;
-          font-weight: 700;
-          border-bottom: 1px dashed #000;
-          background: transparent !important;
-        }
-
-        .gz-receipt th:first-child,
-        .gz-receipt td:first-child {
-          text-align: left;
-        }
-
-        .gz-receipt .gr-item {
-          break-inside: avoid;
-          page-break-inside: avoid;
-        }
-
-        .gz-receipt .gr-product {
-          padding: 3px 1px 1px;
-          line-height: 1.2;
-          overflow-wrap: anywhere;
-        }
-
-        .gz-receipt .gr-code {
-          font-family: monospace;
-          font-size: 9px;
-          margin-right: 4px;
-        }
-
-        .gz-receipt .gr-name {
-          font-weight: 500;
-          margin-right: 4px;
-        }
-
-        .gz-receipt .gr-variant {
-          font-size: 9px;
-        }
-
-        .gz-receipt .gr-values td {
-          border-bottom: 1px dotted #aaa;
-          font-variant-numeric: tabular-nums;
-          text-align: right;
-          padding-bottom: 3px;
-        }
-
-        .gz-receipt .gr-values td:first-child {
-          text-align: left;
-        }
-
-        .gz-receipt .gr-total {
-          border-top: 1px dashed #000;
-          border-bottom: 1px dashed #000;
-          padding: 5px 0;
-          margin: 5px 0;
-          font-size: 14px;
-          font-weight: 700;
-        }
-
-        .gz-receipt .gr-total span,
-        .gz-receipt .gr-total strong {
-          font-weight: 700 !important;
-        }
-
-        .gz-receipt-footer {
-          text-align: center;
-          margin: 3px 0 0;
-          padding: 0;
-          break-inside: avoid;
-          page-break-inside: avoid;
-        }
-
-        .gz-receipt-footer p {
-          margin: 2px 0;
-          line-height: 1.2;
-        }
-
-        .gz-receipt-footer .gz-footer-policy {
-          margin: 3px 0;
-          font-size: 9px;
-        }
-
-        .gz-receipt-footer .gz-footer-follow {
-          margin: 3px 0 2px;
-          font-size: 9px;
-        }
-
-        .gz-receipt-footer .gz-footer-qr {
-          display: block;
-          width: 25mm;
-          height: 25mm;
-          max-width: 100%;
-          object-fit: contain;
-          background: #fff;
-          padding: 1mm;
-          margin: 0 auto;
-        }
-
-        .gz-receipt-footer .gz-footer-instagram {
-          margin: 2px 0 0;
-          font-size: 9px;
-          overflow-wrap: anywhere;
-        }
-
-        .gr-cash-form {
-          margin: 18px 0;
-        }
-
-        .gr-cash-error {
-          color: #dc2626;
-        }
-
-        @media print {
-          @page {
-            size: ${receiptWidth}mm 200mm;
-            margin: 0;
-          }
-
-          html,
-          body,
-          #root {
-            margin: 0 !important;
-            padding: 0 !important;
-            width: ${receiptWidth}mm !important;
-            min-height: 0 !important;
-            height: auto !important;
-            overflow: visible !important;
-            background: #fff !important;
-          }
-
-          body * {
-            visibility: hidden !important;
-          }
-
-          .gz-receipt,
-          .gz-receipt * {
-            visibility: visible !important;
-          }
-
+      <style>
+        {`
           .gz-receipt {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: ${receiptWidth}mm !important;
-            max-width: none !important;
-            margin: 0 !important;
-            padding: 3mm !important;
-            border: 0 !important;
-            box-shadow: none !important;
-            transform: none !important;
-            overflow: visible !important;
-            background: #fff !important;
+            box-sizing: border-box;
+            width: ${receiptWidth}mm;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 3mm;
+            background: #ffffff !important;
+            color: #000000 !important;
+            color-scheme: light;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10px;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+          }
+
+          .gz-receipt *,
+          .gz-receipt *::before,
+          .gz-receipt *::after {
+            box-sizing: border-box;
+          }
+
+          .gz-receipt h2 {
+            margin: 3px 0 2px;
+            font-size: 16px;
+            text-align: center;
+            line-height: 1.15;
             color: #000 !important;
           }
 
-          .gz-receipt-footer {
-            margin-bottom: 0 !important;
+          .gz-receipt p {
+            margin: 2px 0;
+            line-height: 1.25;
+          }
+
+          .gz-receipt .gr-center {
+            text-align: center;
+          }
+
+          .gz-receipt .gr-logo {
+            display: block;
+            width: 42px;
+            max-height: 42px;
+            object-fit: contain;
+            margin: 0 auto 3px;
+          }
+
+          .gz-receipt hr {
+            border: 0;
+            border-top: 1px dashed #000;
+            margin: 4px 0;
+          }
+
+          .gz-receipt .gr-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 6px;
+            width: 100%;
+            margin: 3px 0;
+          }
+
+          .gz-receipt .gr-row > :first-child {
+            flex: 0 1 45%;
+            min-width: 0;
+          }
+
+          .gz-receipt .gr-row > :last-child {
+            flex: 1 1 55%;
+            min-width: 0;
+            text-align: right;
+            overflow-wrap: anywhere;
+            font-variant-numeric: tabular-nums;
+          }
+
+          .gz-receipt table {
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+            table-layout: fixed;
+            font-size: 10px;
+          }
+
+          .gz-receipt th,
+          .gz-receipt td {
+            padding: 2px 1px;
+            vertical-align: top;
+            color: #000 !important;
+          }
+
+          .gz-receipt th {
+            text-align: right;
+            font-weight: 700;
+            border-bottom: 1px dashed #000;
+          }
+
+          .gz-receipt th:first-child,
+          .gz-receipt td:first-child {
+            text-align: left;
           }
 
           .gz-receipt .gr-item {
-            break-inside: avoid !important;
-            page-break-inside: avoid !important;
+            break-inside: avoid;
+            page-break-inside: avoid;
           }
 
-          .gr-no-print {
-            display: none !important;
+          .gz-receipt .gr-product {
+            padding: 3px 1px 1px;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
           }
-        }
-      `}</style>
+
+          .gz-receipt .gr-code {
+            font-family: monospace;
+            font-size: 9px;
+            margin-right: 4px;
+          }
+
+          .gz-receipt .gr-name {
+            font-weight: 500;
+            margin-right: 4px;
+          }
+
+          .gz-receipt .gr-variant {
+            font-size: 9px;
+          }
+
+          .gz-receipt .gr-values td {
+            text-align: right;
+            border-bottom: 1px dotted #aaa;
+            padding-bottom: 3px;
+            font-variant-numeric: tabular-nums;
+          }
+
+          .gz-receipt .gr-values td:first-child {
+            text-align: left;
+          }
+
+          .gz-receipt .gr-total {
+            border-top: 1px dashed #000;
+            border-bottom: 1px dashed #000;
+            padding: 5px 0;
+            margin: 5px 0;
+            font-size: 14px;
+            font-weight: 700;
+          }
+
+          .gz-receipt-footer {
+            text-align: center;
+            margin: 3px 0 0;
+            padding: 0;
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
+          .gz-receipt-footer p {
+            margin: 2px 0;
+            line-height: 1.2;
+          }
+
+          .gz-receipt-footer .gz-footer-policy {
+            margin: 3px 0;
+            font-size: 9px;
+          }
+
+          .gz-receipt-footer .gz-footer-follow {
+            margin: 3px 0 2px;
+            font-size: 9px;
+          }
+
+          .gz-receipt-footer .gz-footer-qr {
+            display: block;
+            width: 25mm;
+            height: 25mm;
+            object-fit: contain;
+            background: white;
+            padding: 1mm;
+            margin: 0 auto;
+          }
+
+          .gz-receipt-footer .gz-footer-instagram {
+            margin: 2px 0 0;
+            font-size: 9px;
+          }
+
+          .gz-receipt-footer > img {
+            display: block;
+            width: 25mm !important;
+            height: 25mm !important;
+            margin: 0 auto !important;
+            padding: 1mm !important;
+            object-fit: contain;
+          }
+
+          .gr-cash-form {
+            margin: 18px 0;
+          }
+
+          .gr-cash-error {
+            color: #dc2626;
+          }
+        `}
+      </style>
 
       <div
         ref={receiptRef}
@@ -719,10 +1084,12 @@ export default function ReceiptModal({
         {sale.exchangeFrom && (
           <>
             <hr />
+
             <p>
               EXCHANGE PURCHASE · Original bill:{" "}
               {sale.exchangeFrom}
             </p>
+
             <p>
               Credit applied:{" "}
               {money(sale.exchangeCredit || 0)}
@@ -736,7 +1103,10 @@ export default function ReceiptModal({
         {sale.returns?.length > 0 && (
           <>
             <hr />
-            <strong>{returnStatus(sale)}</strong>
+
+            <strong>
+              {returnStatus(sale)}
+            </strong>
 
             {sale.returns.map((r) => (
               <div key={r.id}>
@@ -790,7 +1160,9 @@ export default function ReceiptModal({
               <span>
                 Exchange credit value
               </span>
-              <strong>{money(refunded)}</strong>
+              <strong>
+                {money(refunded)}
+              </strong>
             </div>
 
             <div className="gr-row">
@@ -866,7 +1238,9 @@ export default function ReceiptModal({
         <p
           className="gr-no-print"
           role="alert"
-          style={{ color: "#dc2626" }}
+          style={{
+            color: "#dc2626",
+          }}
         >
           {printError}
         </p>
@@ -875,10 +1249,13 @@ export default function ReceiptModal({
       <button
         type="button"
         className="primary full gr-no-print"
+        disabled={printing}
         onClick={() => printCurrentReceipt()}
       >
         <Printer size={17} />
-        Print receipt
+        {printing
+          ? "Preparing receipt…"
+          : "Print receipt"}
       </button>
     </Modal>
   );
