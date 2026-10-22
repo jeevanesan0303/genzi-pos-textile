@@ -1,50 +1,37 @@
+
 import React from "react";
 
 export default function ReceiptFooter({ settings = {} }) {
+  const instagramQr =
+    settings.instagramQr || "/assets/instagram-qr.png";
+
+  const instagramUrl =
+    settings.instagramUrl || "@genzicorner";
+
   return (
-    <div
-      style={{
-        textAlign: "center",
-        breakInside: "avoid"
-      }}
-    >
-      <p>
-        <b>
+    <div className="gz-receipt-footer">
+      <p className="gz-footer-policy">
+        <strong>
           Exchanges only within 5 days of purchase.
+          <br />
           No refunds.
-        </b>
-
+        </strong>
         <br />
-
         Please bring this receipt.
       </p>
 
-      <p>Follow us on Instagram</p>
+      <p className="gz-footer-follow">
+        Follow us on Instagram
+      </p>
 
       <img
-        src={
-          settings.instagramQr ||
-          "/assets/instagram-qr.png"
-        }
+        className="gz-footer-qr"
+        src={instagramQr}
         alt="Instagram QR code"
-        style={{
-          display: "block",
-          width: "28mm",
-          height: "28mm",
-          margin: "0 auto",
-          objectFit: "contain",
-          background: "#fff",
-          padding: "2mm"
-        }}
       />
 
-      <p
-        style={{
-          overflowWrap: "anywhere",
-          fontSize: 10
-        }}
-      >
-        {settings.instagramUrl || "@genzicorner"}
+      <p className="gz-footer-instagram">
+        {instagramUrl}
       </p>
     </div>
   );
