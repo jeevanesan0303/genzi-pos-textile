@@ -139,7 +139,11 @@ const name = account.name.trim();
             {reset && <button className="gc-back" type="button" disabled={busy} onClick={() => changeMode('login')}><ArrowLeft size={16} /> Back to sign in</button>}
           </form>
           <div className="gc-form-foot"><span /> Built for the way you work <span /></div>
-          <p className="gc-store-note">GEN ZI CORNER <span>·</span> A fresh perspective on retail.</p>
+         <div className="gc-developer-credit">
+  <span className="gc-developer-label">Developed By</span>
+  <strong>Xyphora Prime (Pvt) Ltd</strong>
+  <span className="gc-developer-line" aria-hidden="true" />
+</div>
         </div>
         <footer className="gc-access-footer"><span>© {new Date().getFullYear()} Gen Zi Corner</span><span>Powered by Xyphora Prime</span></footer>
       </section>
