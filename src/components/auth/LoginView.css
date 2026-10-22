@@ -723,3 +723,38 @@ main.gc-login {
     transition: none !important;
   }
 }
+/* Developer credit */
+main.gc-login .gc-developer-credit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #eee7f5;
+  text-align: center;
+}
+
+main.gc-login .gc-developer-label {
+  color: #91839f;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+main.gc-login .gc-developer-credit strong {
+  color: #6835b3;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.3px;
+}
+
+main.gc-login .gc-developer-line {
+  width: 44px;
+  height: 3px;
+  margin-top: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #b48aee, #7135cb);
+}
