@@ -1,5 +1,7 @@
+
 import express from "express";
 import helmet from "helmet";
+import cors from "cors";
 import { pool } from "./db.js";
 import authRoutes from "./routes/auth.js";
 import categoryRoutes from "./routes/categories.js";
@@ -18,18 +20,52 @@ import dashboardRoutes from "./routes/dashboard.js";
 import settingsRoutes from "./routes/settings.js";
 import accountRoutes from "./routes/account.js";
 import permissionsRoutes from "./routes/permissions.js";
+
 const app = express();
 
 app.disable("x-powered-by");
 app.use(helmet());
+
+/* ==========================================
+   CORS CONFIGURATION
+========================================== */
+
+const allowedOrigins = [
+  "https://genzicorner.com",
+  "https://www.genzicorner.com",
+  "https://genzi-pos-textile.purple-forest-fa52.workers.dev"
+];
+
+app.use(
+  "/api",
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(null, false);
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: false,
+    maxAge: 86400
+  })
+);
+
+/* ==========================================
+   SECURITY AND CACHE CONTROL
+========================================== */
 
 app.use("/api", (req, res, next) => {
   res.set("Cache-Control", "no-store");
   next();
 });
 
-// Product photos are public catalogue images.
-// Only server-generated WebP files are stored in this directory.
+/* ==========================================
+   PRODUCT PHOTOS
+========================================== */
+
 app.use(
   "/api/product-photos",
   express.static(productPhotoDirectory, {
@@ -39,16 +75,30 @@ app.use(
   })
 );
 
-// This router authenticates first and uses its own 3 MB JSON parser.
-app.use("/api/products", productRoutes);
+/* ==========================================
+   ROUTES WITH CUSTOM JSON PARSERS
+========================================== */
 
+app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/settings", settingsRoutes);
-// Smaller request limit for the other endpoints.
+
+/* ==========================================
+   STANDARD JSON PARSER
+========================================== */
+
 app.use(express.json({ limit: "128kb" }));
+
+/* ==========================================
+   ACCOUNT AND PERMISSIONS
+========================================== */
+
 app.use("/api/account", accountRoutes);
 app.use("/api/permissions", permissionsRoutes);
 
+/* ==========================================
+   POS API ROUTES
+========================================== */
 
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/suppliers", supplierRoutes);
@@ -60,6 +110,9 @@ app.use("/api/sales", salesRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
+/* ==========================================
+   HEALTH CHECK
+========================================== */
 
 app.get("/api/health", async (req, res) => {
   await pool.execute("SELECT 1");
@@ -70,14 +123,26 @@ app.get("/api/health", async (req, res) => {
   });
 });
 
+/* ==========================================
+   AUTHENTICATION AND CATEGORIES
+========================================== */
+
 app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
+
+/* ==========================================
+   UNKNOWN API ENDPOINTS
+========================================== */
 
 app.use("/api", (req, res) => {
   res.status(404).json({
     message: "This API endpoint is not implemented."
   });
 });
+
+/* ==========================================
+   ERROR HANDLING
+========================================== */
 
 app.use((error, req, res, next) => {
   if (res.headersSent) return next(error);
@@ -96,9 +161,10 @@ app.use((error, req, res, next) => {
 
   if ([400, 404, 409].includes(error.status)) {
     return res.status(error.status).json({
-      message: error.status === 404
-        ? "Requested record or image was not found."
-        : error.message
+      message:
+        error.status === 404
+          ? "Requested record or image was not found."
+          : error.message
     });
   }
 
@@ -110,27 +176,26 @@ app.use((error, req, res, next) => {
 
   if (error.code === "ER_ROW_IS_REFERENCED_2") {
     return res.status(409).json({
-      message: "This record is used by other records and cannot be deleted."
+      message:
+        "This record is used by other records and cannot be deleted."
     });
   }
 
   console.error("API error:", {
-  code: error.code || error.name,
-  message: error.sqlMessage || error.message
-});
+    code: error.code || error.name,
+    message: error.sqlMessage || error.message
+  });
 
   res.status(500).json({
     message: "The server could not complete the request."
   });
 });
 
+/* ==========================================
+   DATABASE CHECK AND SERVER STARTUP
+========================================== */
+
 try {
-  // const hash = process.env.ADMIN_PASSWORD_HASH;
-
-  // if (!/^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(hash || "")) {
-  //   throw new Error("Generate a valid ADMIN_PASSWORD_HASH first.");
-  // }
-
   await pool.execute(
     "SELECT id, name, description FROM categories LIMIT 1"
   );
