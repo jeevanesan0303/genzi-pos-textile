@@ -36,8 +36,8 @@ function escapeHTML(value) {
 function createBarcode(sku) {
   const code = String(sku ?? "").trim();
 
-  if (!code) {
-    throw new Error("This product has no SKU.");
+  if (!/^\d{6}$/.test(code)) {
+    throw new Error("Barcode must contain exactly 6 digits.");
   }
 
   const svg = document.createElementNS(
@@ -48,25 +48,18 @@ function createBarcode(sku) {
   JsBarcode(svg, code, {
     format: "CODE128",
     width: 2,
-    height: 38,
+    height: 45,
     displayValue: false,
     margin: 0,
-    marginLeft: 10,
-    marginRight: 10,
+    marginLeft: 20,
+    marginRight: 20,
     background: "#ffffff",
     lineColor: "#000000"
   });
 
-  const width = Number(svg.getAttribute("width"));
-  const height = Number(svg.getAttribute("height"));
-
-  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-  svg.setAttribute("role", "img");
-  svg.setAttribute("aria-label", `Barcode ${code}`);
-
-  svg.removeAttribute("width");
-  svg.removeAttribute("height");
+  // Preserve the original barcode dimensions.
+  // Do not remove width and height attributes.
+  svg.style.shapeRendering = "crispEdges";
 
   return svg;
 }
@@ -157,17 +150,21 @@ const stickerCSS = `
     box-sizing: border-box;
     width: var(--label-width, 38mm);
     height: var(--label-height, 25mm);
-    padding: 1mm 1.5mm;
+
+    padding: 0.8mm 1mm;
+
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+
     overflow: hidden;
-    background: #fff;
-    color: #000;
+    background: #ffffff;
+    color: #000000;
+
     font-family: Arial, sans-serif;
     text-align: center;
-    line-height: 1.05;
+    line-height: 1;
   }
 
   .gz-label-store,
@@ -183,47 +180,73 @@ const stickerCSS = `
     overflow: hidden;
     text-overflow: ellipsis;
     flex-shrink: 0;
+    text-align: center;
   }
 
+  /* SHOP NAME */
   .gz-label-store {
-    font-size: 7pt;
-    font-weight: 700;
-  }
-
-  .gz-label-name {
-    margin-top: 0.4mm;
     font-size: 6.5pt;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-top: 0;
+    margin-bottom: 0.4mm;
   }
 
+  /* PRODUCT NAME */
+  .gz-label-name {
+    font-size: 6.5pt;
+    line-height: 1.1;
+    margin-bottom: 0.3mm;
+  }
+
+  /* SIZE AND COLOUR */
   .gz-label-variant {
-    margin-top: 0.3mm;
     font-size: 6pt;
+    line-height: 1.1;
+    margin-bottom: 0.3mm;
   }
 
+  /* KEEP WORKING BARCODE DIMENSIONS */
   .gz-label-barcode {
-    width: 100%;
-    height: 8mm;
-    margin-top: 0.5mm;
-    flex-shrink: 0;
-  }
+  width: 100%;
+  height: 9mm;
+  margin-top: 0.2mm;
+  flex-shrink: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
 
   .gz-label-barcode svg {
     display: block;
-    width: 100%;
-    height: 100%;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    flex-shrink: 0;
+    shape-rendering: crispEdges;
   }
 
+  /* SKU */
   .gz-label-code {
-    margin-top: 0.2mm;
-    font-size: 6pt;
-    letter-spacing: 0.3pt;
-  }
+  font-size: 6pt;
+  line-height: 1;
+  margin-top: 0.2mm;
+  text-align: center;
+}
 
+  /* PRICE */
   .gz-label-price {
-    margin-top: 0.5mm;
-    font-size: 8pt;
-    font-weight: 700;
-  }
+  font-size: 7.5pt;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-top: 0.2mm;
+  margin-bottom: 0;
+  text-align: center;
+  flex-shrink: 0;
+}
 `;
 
 function labelHTML(product, store) {
