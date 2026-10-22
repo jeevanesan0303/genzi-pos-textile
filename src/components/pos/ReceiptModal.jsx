@@ -1,289 +1,9 @@
-
+import {returnStatus} from '../../exchange';
 import React, { useEffect, useRef, useState } from "react";
-import { Printer } from "lucide-react";
-
-import Modal from "../common/Modal";
-import ReceiptFooter from "./ReceiptFooter";
-import { refundTotal } from "../../returns";
-import { returnStatus } from "../../exchange";
-
-/* ==========================================
-   GEN ZI CORNER - RECEIPT PRINT STYLES
-========================================== */
-
-const createPrintStyles = (width) => `
-  @page {
-    size: ${width}mm 200mm;
-    margin: 0;
-  }
-
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
-
-  html,
-  body {
-    width: ${width}mm;
-    min-height: 0;
-    height: auto;
-    margin: 0;
-    padding: 0;
-    overflow: visible;
-    background: #ffffff;
-    color: #000000;
-  }
-
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .gz-receipt {
-    width: ${width}mm;
-    max-width: ${width}mm;
-    margin: 0;
-    padding: 3mm;
-    background: #ffffff;
-    color: #000000;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 10px;
-    line-height: 1.25;
-    overflow-wrap: anywhere;
-  }
-
-  .gz-receipt h2 {
-    margin: 3px 0 2px;
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 1.15;
-    text-align: center;
-  }
-
-  .gz-receipt p {
-    margin: 2px 0;
-    line-height: 1.25;
-  }
-
-  .gz-receipt .gr-center {
-    text-align: center;
-  }
-
-  .gz-receipt .gr-logo {
-    display: block;
-    width: 42px;
-    max-height: 42px;
-    height: auto;
-    object-fit: contain;
-    margin: 0 auto 3px;
-  }
-
-  .gz-receipt hr {
-    border: 0;
-    border-top: 1px dashed #000;
-    margin: 4px 0;
-  }
-
-  .gz-receipt .gr-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 6px;
-    width: 100%;
-    margin: 3px 0;
-  }
-
-  .gz-receipt .gr-row > :first-child {
-    flex: 0 1 45%;
-    min-width: 0;
-  }
-
-  .gz-receipt .gr-row > :last-child {
-    flex: 1 1 55%;
-    min-width: 0;
-    text-align: right;
-    overflow-wrap: anywhere;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .gz-receipt table {
-    width: 100%;
-    border-collapse: collapse;
-    border-spacing: 0;
-    table-layout: fixed;
-    font-size: 10px;
-  }
-
-  .gz-receipt th,
-  .gz-receipt td {
-    padding: 2px 1px;
-    vertical-align: top;
-  }
-
-  .gz-receipt th {
-    text-align: right;
-    font-weight: 700;
-    border-bottom: 1px dashed #000;
-  }
-
-  .gz-receipt th:first-child,
-  .gz-receipt td:first-child {
-    text-align: left;
-  }
-
-  .gz-receipt .gr-item {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .gz-receipt .gr-product {
-    padding: 3px 1px 1px;
-    line-height: 1.25;
-    overflow-wrap: anywhere;
-  }
-
-  .gz-receipt .gr-code {
-    font-family: monospace;
-    font-size: 9px;
-    margin-right: 4px;
-  }
-
-  .gz-receipt .gr-name {
-    font-weight: 500;
-    margin-right: 4px;
-  }
-
-  .gz-receipt .gr-variant {
-    font-size: 9px;
-  }
-
-  .gz-receipt .gr-values td {
-    text-align: right;
-    border-bottom: 1px dotted #aaa;
-    padding-bottom: 3px;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .gz-receipt .gr-values td:first-child {
-    text-align: left;
-  }
-
-  .gz-receipt .gr-total {
-    border-top: 1px dashed #000;
-    border-bottom: 1px dashed #000;
-    padding: 5px 0;
-    margin: 5px 0;
-    font-size: 14px;
-    font-weight: 700;
-  }
-
-  .gz-receipt-footer {
-    text-align: center;
-    margin: 3px 0 0;
-    padding: 0;
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .gz-receipt-footer p {
-    margin: 2px 0;
-    line-height: 1.2;
-  }
-
-  .gz-receipt-footer .gz-footer-policy {
-    margin: 3px 0;
-    font-size: 9px;
-  }
-
-  .gz-receipt-footer .gz-footer-follow {
-    margin: 3px 0 2px;
-    font-size: 9px;
-  }
-
-  .gz-receipt-footer .gz-footer-qr {
-    display: block;
-    width: 25mm;
-    height: 25mm;
-    max-width: 100%;
-    object-fit: contain;
-    background: #fff;
-    padding: 1mm;
-    margin: 0 auto;
-  }
-
-  .gz-receipt-footer .gz-footer-instagram {
-    margin: 2px 0 0;
-    font-size: 9px;
-    overflow-wrap: anywhere;
-  }
-
-  .gz-receipt-footer:not(:has(.gz-footer-qr)) img {
-    max-width: 25mm;
-    max-height: 25mm;
-    margin: 0 auto;
-  }
-
-  .gz-receipt-footer > p {
-    margin: 2px 0;
-  }
-
-  .gz-receipt-footer > img {
-    display: block;
-    width: 25mm !important;
-    height: 25mm !important;
-    padding: 1mm !important;
-    margin: 0 auto !important;
-    object-fit: contain;
-  }
-
-  .gr-no-print {
-    display: none !important;
-  }
-
-  @media print {
-    @page {
-      size: ${width}mm 200mm;
-      margin: 0;
-    }
-
-    html,
-    body {
-      margin: 0 !important;
-      padding: 0 !important;
-      width: ${width}mm !important;
-      height: auto !important;
-      min-height: 0 !important;
-      overflow: visible !important;
-    }
-
-    .gz-receipt {
-      position: static !important;
-      width: ${width}mm !important;
-      max-width: ${width}mm !important;
-      margin: 0 !important;
-      padding: 3mm !important;
-      box-shadow: none !important;
-      border: none !important;
-      transform: none !important;
-    }
-
-    .gr-item,
-    .gz-receipt-footer {
-      break-inside: avoid !important;
-      page-break-inside: avoid !important;
-    }
-
-    .gr-no-print {
-      display: none !important;
-    }
-  }
-`;
-
-/* ==========================================
-   RECEIPT MODAL
-========================================== */
+import { Printer } from 'lucide-react';
+import Modal from '../common/Modal';
+import ReceiptFooter from './ReceiptFooter';
+import { refundTotal } from '../../returns';
 
 export default function ReceiptModal({
   close,
@@ -291,35 +11,25 @@ export default function ReceiptModal({
   modal,
   money,
   onUpdateCash,
-  autoPrint = false,
+  autoPrint = false
 }) {
-  const [received, setReceived] = useState("");
-  const [cashError, setCashError] = useState("");
+  const [received, setReceived] = useState('');
+  const [cashError, setCashError] = useState('');
   const [saving, setSaving] = useState(false);
-  const [printError, setPrintError] = useState("");
-  const [printing, setPrinting] = useState(false);
-
-  const receiptRef = useRef(null);
-  const printLock = useRef(false);
-  const autoPrintedSale = useRef(null);
-  const printFrameRef = useRef(null);
 
   const sale = modal.sale;
-
   const settings = {
-    ...(data.settings || {}),
-    ...(sale.settings || {}),
-    receiptWidth:
-      sale.settings?.receiptWidth ??
-      sale.settings?.width ??
-      data.settings?.receiptWidth ??
-      80,
-  };
-
+  ...(data.settings || {}),
+  ...(sale.settings || {}),
+  receiptWidth:
+    sale.settings?.receiptWidth ??
+    sale.settings?.width ??
+    data.settings?.receiptWidth ??
+    80
+};
   const products = data.products || [];
 
   const requestedWidth = Number(settings.receiptWidth);
-
   const receiptWidth =
     Number.isFinite(requestedWidth) &&
     requestedWidth >= 40 &&
@@ -327,64 +37,159 @@ export default function ReceiptModal({
       ? requestedWidth
       : 80;
 
-  const saleItems = sale.items || [];
-
   const refunded = Number(refundTotal(sale)) || 0;
   const saleTotal = Number(sale.total) || 0;
   const discount = Number(sale.discount) || 0;
 
-  const subtotal = saleItems.reduce(
+  const subtotal = (sale.items || []).reduce(
     (sum, item) =>
-      sum +
-      (Number(item.price) || 0) *
-        (Number(item.qty) || 0),
+      sum + (Number(item.price) || 0) * (Number(item.qty) || 0),
     0
   );
 
-  const totalItems = saleItems.reduce(
-    (sum, item) => sum + (Number(item.qty) || 0),
-    0
-  );
-
-  const payment = String(sale.payment || "Cash");
-  const cardOnly = payment.toLowerCase() === "card";
+  const payment = String(sale.payment || 'Cash');
+  const cardOnly = payment.toLowerCase() === 'card';
 
   const hasCashReceived =
-    sale.cashReceived != null &&
-    sale.cashReceived !== "";
+    sale.cashReceived != null && sale.cashReceived !== '';
 
   const cashReceived = hasCashReceived
     ? Number(sale.cashReceived)
     : null;
 
+  // For split payments, sale.cash represents the cash portion.
   const cashPortion = Math.max(
     0,
     Number(sale.cash ?? saleTotal) || 0
   );
 
+  const receiptRef = useRef(null);
+const autoPrinted = useRef(false);
+const printLock = useRef(false);
+const [printError, setPrintError] = useState("");
+
+async function printCurrentReceipt(isActive = () => true) {
+  if (printLock.current || !receiptRef.current) return;
+  printLock.current = true;
+  setPrintError("");
+  let frame;
+  try {
+    frame = document.createElement("iframe");
+    frame.title = "Gen Zi Corner continuous receipt";
+    frame.style.cssText = `position:fixed;left:-10000px;top:0;width:${receiptWidth}mm;height:1600px;border:0;`;
+    document.body.appendChild(frame);
+    const doc = frame.contentDocument;
+    const win = frame.contentWindow;
+    if (!doc || !win) throw new Error("Could not open receipt print document.");
+
+    // Copy the exact receipt and its styles; never change sale/payment data.
+    const markup = receiptRef.current.outerHTML;
+    const receiptStyles = receiptRef.current.parentElement?.querySelector("style")?.textContent || "";
+    doc.open();
+    doc.write(`<!doctype html><html><head><meta charset="utf-8"><style>
+      ${receiptStyles}
+      html,body {margin:0!important;padding:0!important;width:${receiptWidth}mm!important;height:auto!important;overflow:visible!important;background:white!important;}
+      .print-area.gz-receipt {
+  display: block !important;
+  position: static !important;
+
+  width: ${receiptWidth}mm !important;
+  max-width: none !important;
+
+  height: auto !important;
+  min-height: 0 !important;
+
+  margin: 0 !important;
+
+  padding: 3mm 7mm 4mm 5mm !important;
+
+  box-sizing: border-box !important;
+
+  overflow: visible !important;
+  box-shadow: none !important;
+}
+      .gr-no-print {display:none!important;}
+      .gz-receipt img {max-width:100%;}
+      .gz-receipt-footer {break-inside:avoid;page-break-inside:avoid;}
+      /* Avoid inherited fixed paper heights from other POS styles. */
+      @media print { html,body {height:auto!important;} }
+    </style></head><body>${markup}</body></html>`);
+    doc.close();
+
+    await doc.fonts.ready;
+    await Promise.all(Array.from(doc.images).map(async img => {
+      if (!img.complete) await new Promise(resolve => {
+        img.addEventListener("load", resolve, {once:true});
+        img.addEventListener("error", resolve, {once:true});
+        setTimeout(resolve, 5000);
+      });
+      if (img.complete && img.naturalWidth && img.decode) await img.decode().catch(() => {});
+    }));
+    if (!isActive()) return;
+    const receipt = doc.querySelector(".gz-receipt");
+    if (!receipt) throw new Error("Receipt markup not found.");
+
+    // Account for every descendant, including QR footer and collapsed margins.
+    const rootTop = receipt.getBoundingClientRect().top;
+    let bottom = Math.max(receipt.getBoundingClientRect().bottom, rootTop + receipt.scrollHeight);
+    receipt.querySelectorAll("*").forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.height && Number.isFinite(rect.bottom)) bottom = Math.max(bottom, rect.bottom);
+    });
+    const measuredPx = Math.ceil(bottom - rootTop);
+    const paperHeightMM = Math.ceil(measuredPx * 25.4 / 96 + 12);
+    const dynamicStyle = doc.createElement("style");
+    dynamicStyle.textContent = `
+      @page { size:${receiptWidth}mm ${paperHeightMM}mm; margin:0; }
+      @media print {
+        html,body {width:${receiptWidth}mm!important;height:auto!important;margin:0!important;padding:0!important;}
+        .print-area.gz-receipt {width:${receiptWidth}mm!important;height:auto!important;min-height:0!important;padding: 3mm 7mm 4mm 5mm !important;
+box-sizing: border-box !important;margin:0!important;}
+        .gz-receipt-footer {break-inside:avoid;page-break-inside:avoid;}
+      }`;
+    doc.head.appendChild(dynamicStyle);
+    console.info(`Receipt requested paper: ${receiptWidth}mm x ${paperHeightMM}mm`);
+    await new Promise(resolve => win.requestAnimationFrame(() => win.requestAnimationFrame(resolve)));
+    win.focus();
+    win.print();
+  } catch (error) {
+    if (isActive()) setPrintError(error?.message || "Unable to print receipt.");
+  } finally {
+    printLock.current = false;
+    if (frame) setTimeout(() => frame.remove(), 30000);
+  }
+}
+
+useEffect(() => {
+  if (!autoPrint || autoPrinted.current) return;
+
+  let active = true;
+
+  const timer = setTimeout(() => {
+    if (!active) return;
+    autoPrinted.current = true;
+    printCurrentReceipt(() => active);
+  }, 150);
+
+  return () => {
+    active = false;
+    clearTimeout(timer);
+  };
+}, [autoPrint]);
+
   const changeDue =
-    sale.changeDue != null &&
-    sale.changeDue !== ""
+    sale.changeDue != null && sale.changeDue !== ''
       ? Number(sale.changeDue)
       : cashReceived != null
         ? Math.max(0, cashReceived - cashPortion)
         : null;
 
-  /* ==========================================
-     PRODUCT HELPERS
-  ========================================== */
-
   const getProduct = (item) => {
-    const id =
-      item.productId ??
-      item.product_id ??
-      item.id;
-
+    const id = item.productId ?? item.product_id ?? item.id;
     if (id == null) return undefined;
 
     return products.find(
-      (product) =>
-        String(product.id) === String(id)
+      (product) => String(product.id) === String(id)
     );
   };
 
@@ -396,508 +201,331 @@ export default function ReceiptModal({
         item.sku ||
         product?.barcode ||
         product?.sku ||
-        ""
+        ''
     ).trim();
   };
 
-  /* ==========================================
-     REMOVE PREVIOUS PRINT FRAME
-  ========================================== */
-
-  const removePrintFrame = () => {
-    const frame = printFrameRef.current;
-
-    if (frame) {
-      frame.remove();
-      printFrameRef.current = null;
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      removePrintFrame();
-    };
-  }, []);
-
-  /* ==========================================
-     PRINT ONLY THE RECEIPT
-  ========================================== */
-
-  const printCurrentReceipt = async (
-    isActive = () => true
-  ) => {
-    if (printLock.current) return;
-
-    printLock.current = true;
-    setPrintError("");
-    setPrinting(true);
-
-    try {
-      const receiptElement = receiptRef.current;
-
-      if (!receiptElement) {
-        throw new Error(
-          "Receipt content is not available."
-        );
-      }
-
-      removePrintFrame();
-
-      const frame = document.createElement("iframe");
-
-      frame.setAttribute(
-        "title",
-        "Gen Zi Corner receipt print"
-      );
-
-      frame.setAttribute(
-        "aria-hidden",
-        "true"
-      );
-
-      frame.style.position = "fixed";
-      frame.style.width = "0";
-      frame.style.height = "0";
-      frame.style.border = "0";
-      frame.style.opacity = "0";
-      frame.style.pointerEvents = "none";
-
-      document.body.appendChild(frame);
-      printFrameRef.current = frame;
-
-      const printDocument =
-        frame.contentDocument ||
-        frame.contentWindow?.document;
-
-      if (!printDocument) {
-        throw new Error(
-          "Unable to create receipt print document."
-        );
-      }
-
-      const receiptHtml = receiptElement.outerHTML;
-
-      printDocument.open();
-
-      printDocument.write(`
-        <!DOCTYPE html>
-        <html lang="en">
-          <head>
-            <meta charset="UTF-8" />
-            <meta
-              name="viewport"
-              content="width=device-width, initial-scale=1"
-            />
-            <title>Gen Zi Corner Receipt</title>
-            <base href="${document.baseURI.replace(/"/g, "&quot;")}" />
-            <style>
-              ${createPrintStyles(receiptWidth)}
-            </style>
-          </head>
-
-          <body>
-            ${receiptHtml}
-          </body>
-        </html>
-      `);
-
-      printDocument.close();
-
-      const images = Array.from(
-        printDocument.images || []
-      );
-
-      await Promise.all(
-        images.map(
-          (image) =>
-            new Promise((resolve, reject) => {
-              if (image.complete) {
-                if (image.naturalWidth > 0) {
-                  resolve();
-                } else {
-                  reject(
-                    new Error(
-                      "A receipt image could not load."
-                    )
-                  );
-                }
-                return;
-              }
-
-              const timeout = setTimeout(() => {
-                cleanup();
-                reject(
-                  new Error(
-                    "Receipt image loading timed out."
-                  )
-                );
-              }, 10000);
-
-              const cleanup = () => {
-                clearTimeout(timeout);
-                image.removeEventListener(
-                  "load",
-                  loaded
-                );
-                image.removeEventListener(
-                  "error",
-                  failed
-                );
-              };
-
-              const loaded = () => {
-                cleanup();
-                resolve();
-              };
-
-              const failed = () => {
-                cleanup();
-                reject(
-                  new Error(
-                    "A receipt image could not load."
-                  )
-                );
-              };
-
-              image.addEventListener(
-                "load",
-                loaded
-              );
-
-              image.addEventListener(
-                "error",
-                failed
-              );
-            })
-        )
-      );
-
-      if (printDocument.fonts?.ready) {
-        await printDocument.fonts.ready;
-      }
-
-      if (!isActive()) {
-        removePrintFrame();
-        return;
-      }
-
-      const printWindow = frame.contentWindow;
-
-      if (!printWindow) {
-        throw new Error(
-          "Unable to access the receipt print window."
-        );
-      }
-
-      printWindow.focus();
-      printWindow.print();
-
-      // Keep the frame alive until the print
-      // dialog has finished. A later print or
-      // component unmount removes the frame.
-
-    } catch (error) {
-      if (isActive()) {
-        setPrintError(
-          error?.message ||
-            "Unable to prepare receipt for printing."
-        );
-      }
-
-      removePrintFrame();
-    } finally {
-      printLock.current = false;
-      setPrinting(false);
-    }
-  };
-
-  /* ==========================================
-     AUTO PRINT
-  ========================================== */
-
-  useEffect(() => {
-    if (!autoPrint) return;
-
-    const saleKey = String(
-      sale.id ?? sale.number ?? ""
-    );
-
-    if (autoPrintedSale.current === saleKey) {
-      return;
-    }
-
-    autoPrintedSale.current = saleKey;
-
-    let active = true;
-
-    const timer = setTimeout(() => {
-      if (active) {
-        printCurrentReceipt(() => active);
-      }
-    }, 250);
-
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [autoPrint, sale.id, sale.number]);
-
-  /* ==========================================
-     SAVE MISSING CASH DETAILS
-  ========================================== */
-
   const saveCash = async (event) => {
     event.preventDefault();
-    setCashError("");
+    setCashError('');
 
     const amount = Number(received);
 
     if (
-      received.trim() === "" ||
+      received.trim() === '' ||
       !Number.isFinite(amount) ||
       amount < cashPortion
     ) {
       setCashError(
-        `Enter an amount of at least ${money(
-          cashPortion
-        )}.`
+        `Enter an amount of at least ${money(cashPortion)}.`
       );
       return;
     }
 
     try {
       setSaving(true);
-
       await onUpdateCash(sale, amount);
-
-      setReceived("");
+      setReceived('');
     } catch (error) {
-      setCashError(
-        error?.message ||
-          "Unable to save cash details."
-      );
+      setCashError(error?.message || 'Unable to save cash details.');
     } finally {
       setSaving(false);
     }
   };
 
-  /* ==========================================
-     RECEIPT UI
-  ========================================== */
-
   return (
     <Modal title="Receipt preview" close={close}>
-      <style>
-        {`
+      <style>{`
+        .gz-receipt {
+          box-sizing: border-box;
+          max-width: 100%;
+          margin: 0 auto;
+          padding: 4mm;
+          color: #000;
+          background: #fff;
+          font-family: Arial, sans-serif;
+          font-size: 11px;
+          line-height: 1.4;
+          overflow-wrap: anywhere;
+        }
+        .gz-receipt * { box-sizing: border-box; }
+        .gz-receipt h2 {
+          margin: 8px 0 4px;
+          font-size: 18px;
+          text-align: center;
+        }
+        .gz-receipt .gr-center {
+          text-align: center;
+          margin: 5px 0;
+        }
+        .gz-receipt .gr-logo {
+          display: block;
+          width: 48px;
+          height: auto;
+          margin: 0 auto 6px;
+        }
+        .gz-receipt hr {
+          border: 0;
+          border-top: 1px dashed #000;
+          margin: 10px 0;
+        }
+        .gz-receipt table {
+          width: 100%;
+          border-collapse: collapse;
+          table-layout: fixed;
+          font-size: inherit;
+          color: #000;
+        }
+        .gz-receipt th,
+        .gz-receipt td {
+          padding: 5px 2px;
+          vertical-align: top;
+        }
+        .gz-receipt th {
+          border-bottom: 1px dashed #000;
+          font-weight: 700;
+          text-align: right;
+        }
+        .gz-receipt th:first-child { text-align: left; }
+        .gz-receipt .gr-product {
+  padding: 5px 0 2px;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+}
+        .gz-receipt .gr-code {
+  display: inline;
+  font-family: monospace;
+  font-size: 10px;
+  margin-right: 5px;
+}
+
+.gz-receipt .gr-name {
+  display: inline;
+  font-weight: 100;
+  margin-right: 5px;
+}
+
+.gz-receipt .gr-variant {
+  display: inline;
+  font-size: 10px;
+}
+        .gz-receipt .gr-values td {
+          text-align: right;
+          border-bottom: 1px dotted #aaa;
+          font-variant-numeric: tabular-nums;
+        }
+        .gz-receipt .gr-values td:first-child {
+          text-align: left;
+        }
+        .gz-receipt .gr-row {
+          display: flex;
+          justify-content: space-between;
+          gap: 10px;
+          margin: 6px 0;
+        }
+        .gz-receipt .gr-row > :last-child {
+          text-align: right;
+          font-variant-numeric: tabular-nums;
+        }
+        .gz-receipt .gr-total {
+          border-top: 1px dashed #000;
+          border-bottom: 1px dashed #000;
+          padding: 8px 0;
+          margin: 10px 0;
+          font-size: 15px;
+          font-weight: 700;
+        }
+        .gz-receipt .gr-item {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+        .gr-cash-form { margin: 18px 0; }
+        .gr-cash-error { color: #dc2626; }
+
+        /* Compact receipt spacing */
+.gz-receipt {
+  line-height: 1.2;
+}
+
+.gz-receipt h2 {
+  margin: 4px 0 2px;
+}
+
+.gz-receipt p,
+.gz-receipt .gr-center {
+  margin: 3px 0;
+  line-height: 1.2;
+}
+
+.gz-receipt .gr-logo {
+  margin-bottom: 3px;
+}
+
+.gz-receipt hr {
+  margin: 5px 0;
+}
+
+.gz-receipt th,
+.gz-receipt td {
+  padding: 2px;
+}
+
+.gz-receipt .gr-product {
+  padding: 3px 0 1px;
+  line-height: 1.2;
+}
+
+.gz-receipt .gr-values td {
+  padding-top: 2px;
+  padding-bottom: 3px;
+}
+
+.gz-receipt .gr-row {
+  margin: 3px 0;
+}
+
+.gz-receipt .gr-total {
+  padding: 4px 0;
+  margin: 5px 0;
+}
+
+.gz-receipt .gr-total,
+.gz-receipt .gr-total strong {
+  font-weight: 500;
+}
+
+        @media print {
+         
           .gz-receipt {
-            box-sizing: border-box;
-            width: ${receiptWidth}mm;
-            max-width: 100%;
-            margin: 0 auto;
-            padding: 3mm;
-            background: #ffffff !important;
-            color: #000000 !important;
-            color-scheme: light;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 10px;
-            line-height: 1.25;
-            overflow-wrap: anywhere;
+            width: ${receiptWidth}mm !important;
+            max-width: none !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: 0 !important;
           }
+          .gr-no-print { display: none !important; }
+        }
+      /* Keep the receipt white in both light and dark mode. */
+.gz-receipt {
+  color-scheme: light;
+  color: #000 !important;
+  background: #fff !important;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.2;
+}
 
-          .gz-receipt *,
-          .gz-receipt *::before,
-          .gz-receipt *::after {
-            box-sizing: border-box;
-          }
+.gz-receipt h2 {
+  color: #17243b !important;
+  background: transparent !important;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  margin: 4px 0 2px;
+}
 
-          .gz-receipt h2 {
-            margin: 3px 0 2px;
-            font-size: 16px;
-            text-align: center;
-            line-height: 1.15;
-            color: #000 !important;
-          }
+.gz-receipt p,
+.gz-receipt span,
+.gz-receipt small,
+.gz-receipt strong,
+.gz-receipt b,
+.gz-receipt td {
+  color: #000 !important;
+}
 
-          .gz-receipt p {
-            margin: 2px 0;
-            line-height: 1.25;
-          }
+.gz-receipt table,
+.gz-receipt tbody,
+.gz-receipt tr,
+.gz-receipt td {
+  background: transparent !important;
+}
 
-          .gz-receipt .gr-center {
-            text-align: center;
-          }
+.gz-receipt thead,
+.gz-receipt thead tr,
+.gz-receipt th {
+  background: #f4f5f9 !important;
+}
 
-          .gz-receipt .gr-logo {
-            display: block;
-            width: 42px;
-            max-height: 42px;
-            object-fit: contain;
-            margin: 0 auto 3px;
-          }
+.gz-receipt th {
+  color: #667085 !important;
+  font-weight: 700;
+  border-bottom: 1px dashed #000 !important;
+}
 
-          .gz-receipt hr {
-            border: 0;
-            border-top: 1px dashed #000;
-            margin: 4px 0;
-          }
+.gz-receipt th,
+.gz-receipt td {
+  padding: 2px;
+}
 
-          .gz-receipt .gr-row {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 6px;
-            width: 100%;
-            margin: 3px 0;
-          }
+.gz-receipt .gr-product {
+  padding: 3px 0 1px;
+  line-height: 1.2;
+  border-bottom: 1px solid #dce2ed !important;
+}
 
-          .gz-receipt .gr-row > :first-child {
-            flex: 0 1 45%;
-            min-width: 0;
-          }
+.gz-receipt .gr-code {
+  display: inline;
+  font-family: monospace;
+  font-size: 10px;
+  margin-right: 5px;
+}
 
-          .gz-receipt .gr-row > :last-child {
-            flex: 1 1 55%;
-            min-width: 0;
-            text-align: right;
-            overflow-wrap: anywhere;
-            font-variant-numeric: tabular-nums;
-          }
+.gz-receipt .gr-name {
+  display: inline;
+  font-weight: 400;
+  margin-right: 5px;
+}
 
-          .gz-receipt table {
-            width: 100%;
-            border-collapse: collapse;
-            border-spacing: 0;
-            table-layout: fixed;
-            font-size: 10px;
-          }
+.gz-receipt .gr-variant {
+  display: inline;
+  font-size: 10px;
+}
 
-          .gz-receipt th,
-          .gz-receipt td {
-            padding: 2px 1px;
-            vertical-align: top;
-            color: #000 !important;
-          }
+.gz-receipt .gr-values td {
+  padding-top: 2px;
+  padding-bottom: 3px;
+  border-bottom: 1px dotted #aaa !important;
+}
 
-          .gz-receipt th {
-            text-align: right;
-            font-weight: 700;
-            border-bottom: 1px dashed #000;
-          }
+.gz-receipt .gr-row {
+  margin: 3px 0;
+}
 
-          .gz-receipt th:first-child,
-          .gz-receipt td:first-child {
-            text-align: left;
-          }
+.gz-receipt .gr-total {
+  padding: 4px 0;
+  margin: 5px 0;
+  font-size: 15px;
+  border-top: 1px dashed #000 !important;
+  border-bottom: 1px dashed #000 !important;
+}
 
-          .gz-receipt .gr-item {
-            break-inside: avoid;
-            page-break-inside: avoid;
-          }
+/* Bold total, matching your second screenshot. */
+.gz-receipt .gr-total,
+.gz-receipt .gr-total span,
+.gz-receipt .gr-total strong {
+  font-weight: 700 !important;
+}
 
-          .gz-receipt .gr-product {
-            padding: 3px 1px 1px;
-            line-height: 1.25;
-            overflow-wrap: anywhere;
-          }
+.gz-receipt p,
+.gz-receipt .gr-center {
+  margin: 3px 0;
+  line-height: 1.2;
+}
 
-          .gz-receipt .gr-code {
-            font-family: monospace;
-            font-size: 9px;
-            margin-right: 4px;
-          }
+.gz-receipt hr {
+  margin: 5px 0;
+  border: 0;
+  border-top: 1px dashed #000 !important;
+}
 
-          .gz-receipt .gr-name {
-            font-weight: 500;
-            margin-right: 4px;
-          }
-
-          .gz-receipt .gr-variant {
-            font-size: 9px;
-          }
-
-          .gz-receipt .gr-values td {
-            text-align: right;
-            border-bottom: 1px dotted #aaa;
-            padding-bottom: 3px;
-            font-variant-numeric: tabular-nums;
-          }
-
-          .gz-receipt .gr-values td:first-child {
-            text-align: left;
-          }
-
-          .gz-receipt .gr-total {
-            border-top: 1px dashed #000;
-            border-bottom: 1px dashed #000;
-            padding: 5px 0;
-            margin: 5px 0;
-            font-size: 14px;
-            font-weight: 700;
-          }
-
-          .gz-receipt-footer {
-            text-align: center;
-            margin: 3px 0 0;
-            padding: 0;
-            break-inside: avoid;
-            page-break-inside: avoid;
-          }
-
-          .gz-receipt-footer p {
-            margin: 2px 0;
-            line-height: 1.2;
-          }
-
-          .gz-receipt-footer .gz-footer-policy {
-            margin: 3px 0;
-            font-size: 9px;
-          }
-
-          .gz-receipt-footer .gz-footer-follow {
-            margin: 3px 0 2px;
-            font-size: 9px;
-          }
-
-          .gz-receipt-footer .gz-footer-qr {
-            display: block;
-            width: 25mm;
-            height: 25mm;
-            object-fit: contain;
-            background: white;
-            padding: 1mm;
-            margin: 0 auto;
-          }
-
-          .gz-receipt-footer .gz-footer-instagram {
-            margin: 2px 0 0;
-            font-size: 9px;
-          }
-
-          .gz-receipt-footer > img {
-            display: block;
-            width: 25mm !important;
-            height: 25mm !important;
-            margin: 0 auto !important;
-            padding: 1mm !important;
-            object-fit: contain;
-          }
-
-          .gr-cash-form {
-            margin: 18px 0;
-          }
-
-          .gr-cash-error {
-            color: #dc2626;
-          }
-        `}
-      </style>
+.gz-receipt .gr-logo {
+  margin-bottom: 3px;
+}`}</style>
 
       <div
         ref={receiptRef}
         className="print-area receipt gz-receipt"
-        style={{
-          width: `${receiptWidth}mm`,
-        }}
+        style={{ width: `${receiptWidth}mm` }}
       >
         {settings.showLogo && (
           <img
@@ -907,21 +535,16 @@ export default function ReceiptModal({
           />
         )}
 
-        <h2>
-          {settings.store || "GEN ZI CORNER"}
-        </h2>
+        <h2>{settings.store || 'GEN ZI CORNER'}</h2>
 
         {settings.tagline && (
-          <p className="gr-center">
-            {settings.tagline}
-          </p>
+          <p className="gr-center">{settings.tagline}</p>
         )}
 
         {settings.showContact !== false && (
           <p className="gr-center">
             {settings.address}
-            {settings.address &&
-              settings.phone && <br />}
+            {settings.address && settings.phone && <br />}
             {settings.phone}
           </p>
         )}
@@ -935,27 +558,21 @@ export default function ReceiptModal({
 
         <div className="gr-row">
           <span>Date</span>
-          <span>
-            {new Date(sale.date).toLocaleString(
-              "en-LK"
-            )}
-          </span>
+          <span>{new Date(sale.date).toLocaleString('en-LK')}</span>
         </div>
 
         <div className="gr-row">
           <span>Customer</span>
-          <span>
-            {sale.customer || "Walk-in customer"}
-          </span>
+          <span>{sale.customer || 'Walk-in customer'}</span>
         </div>
 
         <hr />
 
         <table aria-label="Receipt items">
           <colgroup>
-            <col style={{ width: "18%" }} />
-            <col style={{ width: "36%" }} />
-            <col style={{ width: "46%" }} />
+            <col style={{ width: '18%' }} />
+            <col style={{ width: '36%' }} />
+            <col style={{ width: '46%' }} />
           </colgroup>
 
           <thead>
@@ -966,51 +583,33 @@ export default function ReceiptModal({
             </tr>
           </thead>
 
-          {saleItems.map((item, index) => {
+          {(sale.items || []).map((item, index) => {
             const product = getProduct(item);
             const code = getCode(item);
-
             const variant = [
               item.size || product?.size,
               item.colour || product?.colour,
             ]
               .filter(Boolean)
-              .join(" · ");
+              .join(' · ');
 
             return (
-              <tbody
-                className="gr-item"
-                key={`${
-                  item.id || "item"
-                }-${index}`}
-              >
+              <tbody className="gr-item" key={`${item.id || 'item'}-${index}`}>
                 <tr>
-                  <td
-                    colSpan={3}
-                    className="gr-product"
-                  >
+                  <td colSpan={3} className="gr-product">
                     <span className="gr-code">
-                      {code ||
-                        "Barcode not recorded"}
-                    </span>{" "}
-                    <span className="gr-name">
-                      {item.name}
-                    </span>{" "}
+                      {code || 'Barcode not recorded'}
+                    </span>
+                    <span className="gr-name">{item.name}</span>
                     {variant && (
-                      <span className="gr-variant">
-                        {variant}
-                      </span>
+                      <span className="gr-variant">{variant}</span>
                     )}
                   </td>
                 </tr>
 
                 <tr className="gr-values">
                   <td>{item.qty}</td>
-                  <td>
-                    {money(
-                      Number(item.price) || 0
-                    )}
-                  </td>
+                  <td>{money(Number(item.price) || 0)}</td>
                   <td>
                     {money(
                       (Number(item.price) || 0) *
@@ -1025,7 +624,12 @@ export default function ReceiptModal({
 
         <div className="gr-row">
           <span>Total items</span>
-          <strong>{totalItems}</strong>
+          <strong>
+            {(sale.items || []).reduce(
+              (sum, item) => sum + (Number(item.qty) || 0),
+              0
+            )}
+          </strong>
         </div>
 
         <div className="gr-row">
@@ -1057,16 +661,14 @@ export default function ReceiptModal({
               <strong>
                 {cashReceived != null
                   ? money(cashReceived)
-                  : "Not recorded"}
+                  : 'Not recorded'}
               </strong>
             </div>
 
             <div className="gr-row">
               <span>Balance / Change</span>
               <strong>
-                {changeDue != null
-                  ? money(changeDue)
-                  : "Not recorded"}
+                {changeDue != null ? money(changeDue) : 'Not recorded'}
               </strong>
             </div>
           </>
@@ -1075,103 +677,22 @@ export default function ReceiptModal({
         {Number(sale.card) > 0 && (
           <div className="gr-row">
             <span>Card paid</span>
-            <strong>
-              {money(Number(sale.card))}
-            </strong>
+            <strong>{money(Number(sale.card))}</strong>
           </div>
         )}
 
-        {sale.exchangeFrom && (
-          <>
-            <hr />
-
-            <p>
-              EXCHANGE PURCHASE · Original bill:{" "}
-              {sale.exchangeFrom}
-            </p>
-
-            <p>
-              Credit applied:{" "}
-              {money(sale.exchangeCredit || 0)}
-              <br />
-              Additional payment:{" "}
-              {money(sale.additionalPayment || 0)}
-            </p>
-          </>
-        )}
-
-        {sale.returns?.length > 0 && (
-          <>
-            <hr />
-
-            <strong>
-              {returnStatus(sale)}
-            </strong>
-
-            {sale.returns.map((r) => (
-              <div key={r.id}>
-                <p>
-                  {r.mode === "exchange"
-                    ? "EXCHANGE"
-                    : "HISTORICAL ADJUSTMENT"}
-                  {" · "}
-                  {r.number || r.id}
-                  <br />
-                  {new Date(
-                    r.date
-                  ).toLocaleString()}
-                  <br />
-                  {(r.items || [])
-                    .map(
-                      (i) =>
-                        `${i.name} × ${i.qty}`
-                    )
-                    .join(", ")}
-                  <br />
-                  Value: {money(r.total)}
-                  {r.replacementNumber && (
-                    <>
-                      <br />
-                      New bill:{" "}
-                      {r.replacementNumber}
-                    </>
-                  )}
-                </p>
-
-                <button
-                  type="button"
-                  className="small gr-no-print"
-                  onClick={() =>
-                    modal.openReturnReceipt?.(r)
-                  }
-                >
-                  View exchange receipt
-                </button>
-              </div>
-            ))}
-          </>
-        )}
-
+        {sale.exchangeFrom&&<><hr/><p>EXCHANGE PURCHASE · Original bill: {sale.exchangeFrom}</p><p>Credit applied: {money(sale.exchangeCredit||0)}<br/>Additional payment: {money(sale.additionalPayment||0)}</p></>}
+        {sale.returns?.length>0&&<><hr/><strong>{returnStatus(sale)}</strong>{sale.returns.map(r=><div key={r.id}><p>{r.mode==='exchange'?'EXCHANGE':'HISTORICAL ADJUSTMENT'} · {r.number||r.id}<br/>{new Date(r.date).toLocaleString()}<br/>{r.items.map(i=>i.name+' × '+i.qty).join(', ')}<br/>Value: {money(r.total)}{r.replacementNumber&&<><br/>New bill: {r.replacementNumber}</>}</p><button className="small gr-no-print" onClick={()=>modal.openReturnReceipt?.(r)}>View exchange receipt</button></div>)}</>}
         {refunded > 0 && (
           <>
             <hr />
-
             <div className="gr-row">
-              <span>
-                Exchange credit value
-              </span>
-              <strong>
-                {money(refunded)}
-              </strong>
+              <span>Exchange credit value</span>
+              <strong>{money(refunded)}</strong>
             </div>
-
             <div className="gr-row">
-              <span>
-                Original bill retained value
-              </span>
-              <strong>
-                {money(saleTotal - refunded)}
-              </strong>
+              <span>Original bill retained value</span>
+              <strong>{money(saleTotal - refunded)}</strong>
             </div>
           </>
         )}
@@ -1179,83 +700,62 @@ export default function ReceiptModal({
         <hr />
 
         <p className="gr-center">
-          {settings.footer ??
-            "Thank you for shopping with us!"}
+          {settings.footer ?? 'Thank you for shopping with us!'}
         </p>
 
         <ReceiptFooter settings={settings} />
       </div>
 
-      {!cardOnly &&
-        !hasCashReceived &&
-        onUpdateCash && (
-          <form
-            className="gr-cash-form gr-no-print"
-            onSubmit={saveCash}
-          >
-            <p>
-              Older receipt: enter the actual
-              cash received to save the missing
-              payment details.
-            </p>
-
-            <label>
-              Actual cash received
-              <input
-                required
-                type="number"
-                step="0.01"
-                min={cashPortion}
-                value={received}
-                onChange={(event) =>
-                  setReceived(event.target.value)
-                }
-              />
-            </label>
-
-            {cashError && (
-              <p
-                className="gr-cash-error"
-                role="alert"
-              >
-                {cashError}
-              </p>
-            )}
-
-            <button
-              className="secondary"
-              type="submit"
-              disabled={saving}
-            >
-              {saving
-                ? "Saving…"
-                : "Save cash & balance"}
-            </button>
-          </form>
-        )}
-
-      {printError && (
-        <p
-          className="gr-no-print"
-          role="alert"
-          style={{
-            color: "#dc2626",
-          }}
+      {!cardOnly && !hasCashReceived && onUpdateCash && (
+        <form
+          className="gr-cash-form gr-no-print"
+          onSubmit={saveCash}
         >
-          {printError}
-        </p>
+          <p>
+            Older receipt: enter the actual cash received to save the
+            missing payment details.
+          </p>
+
+          <label>
+            Actual cash received
+            <input
+              required
+              type="number"
+              step="0.01"
+              min={cashPortion}
+              value={received}
+              onChange={(event) => setReceived(event.target.value)}
+            />
+          </label>
+
+          {cashError && (
+            <p className="gr-cash-error" role="alert">
+              {cashError}
+            </p>
+          )}
+
+          <button
+            className="secondary"
+            type="submit"
+            disabled={saving}
+          >
+            {saving ? 'Saving…' : 'Save cash & balance'}
+          </button>
+        </form>
       )}
+      {printError && (
+  <p className="gr-no-print" role="alert" style={{ color: "#dc2626" }}>
+    {printError}
+  </p>
+)}
 
       <button
         type="button"
         className="primary full gr-no-print"
-        disabled={printing}
         onClick={() => printCurrentReceipt()}
       >
         <Printer size={17} />
-        {printing
-          ? "Preparing receipt…"
-          : "Print receipt"}
+        Print receipt
       </button>
     </Modal>
   );
