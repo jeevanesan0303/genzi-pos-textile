@@ -465,10 +465,11 @@ export default function PosView({ settings = {} }) {
     setCustomerCreateError("");
 
     try {
-      const apiBase = (import.meta.env.VITE_API_BASE_URL || "/api").replace(
-        /\/+$/,
-        "",
-      );
+      const apiBase = (
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  "/api"
+).replace(/\/+$/, "");
 
       const response = await fetch(`${apiBase}/customers`, {
         method: "POST",
