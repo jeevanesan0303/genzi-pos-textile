@@ -542,24 +542,61 @@ router.delete(
 
       const before = await details(db, id);
 
-      const products = await lockProducts(
-        db,
-        before.items.map((item) => item.productId)
-      );
+     
+const products = new Map();
 
-      for (const item of before.items) {
-        const product = products.get(item.productId);
-        const stock = Number(product.stock) + item.quantity;
+for (const productId of [
+  ...new Set(
+    before.items
+      .map((item) => item.productId)
+      .filter(Boolean)
+  )
+].sort()) {
+  const [rows] = await db.execute(
+    "SELECT * FROM products WHERE id = ? FOR UPDATE",
+    [productId]
+  );
 
-        if (!Number.isSafeInteger(stock) || stock > 2147483647) {
-          fail("Resulting stock quantity is too large.");
-        }
+  // Historical product may already be deleted.
+  // Skip missing products instead of blocking bill cancellation.
+  if (rows.length) {
+    products.set(productId, rows[0]);
+  }
+}
 
-        await db.execute(
-          "UPDATE products SET stock = ? WHERE id = ?",
-          [stock, item.productId]
-        );
-      }
+const restoreQuantities = new Map();
+
+for (const item of before.items) {
+  // Only restore stock for products that still exist.
+  if (!products.has(item.productId)) {
+    continue;
+  }
+
+  restoreQuantities.set(
+    item.productId,
+    (restoreQuantities.get(item.productId) || 0) +
+      Number(item.quantity)
+  );
+}
+
+for (const [productId, quantity] of restoreQuantities) {
+  const product = products.get(productId);
+  const stock = Number(product.stock) + quantity;
+
+  if (
+    !Number.isSafeInteger(stock) ||
+    stock < 0 ||
+    stock > 2147483647
+  ) {
+    fail("Resulting stock quantity is too large.");
+  }
+
+  await db.execute(
+    "UPDATE products SET stock = ? WHERE id = ?",
+    [stock, productId]
+  );
+}
+
 
       await db.execute(
         `
