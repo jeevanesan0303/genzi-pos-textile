@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import Swal from "sweetalert2";
 import { Plus, Pencil, Trash2, RefreshCw } from "lucide-react";
@@ -14,11 +15,114 @@ import {
   deleteProduct
 } from "../../api/products";
 
+/* ==========================================
+   PRODUCT IMAGE URL CONFIGURATION
+========================================== */
+
+const API_BASE = (
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://genzi-api.xyphoraprime.com/api"
+).replace(/\/+$/, "");
+
+const API_ORIGIN = API_BASE.replace(/\/api$/, "");
+
+function getProductImageUrl(image) {
+  if (!image) return "";
+
+  const value = String(image).trim();
+
+  if (!value) return "";
+
+  if (
+    value.startsWith("data:image/") ||
+    value.startsWith("blob:")
+  ) {
+    return value;
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      const url = new URL(value);
+
+      if (
+        ["genzicorner.com", "www.genzicorner.com"].includes(
+          url.hostname
+        ) &&
+        url.pathname.startsWith("/api/product-photos/")
+      ) {
+        return `${API_ORIGIN}${url.pathname}${url.search}`;
+      }
+
+      return value;
+    } catch {
+      return "";
+    }
+  }
+
+  const path = value.replace(/^\/+/, "");
+
+  if (path.startsWith("api/product-photos/")) {
+    return `${API_ORIGIN}/${path}`;
+  }
+
+  if (path.startsWith("product-photos/")) {
+    return `${API_BASE}/${path}`;
+  }
+
+  return `${API_BASE}/product-photos/${path}`;
+}
+
+/* ==========================================
+   PRODUCT IMAGE COMPONENT
+========================================== */
+
+function ProductPhoto({ product }) {
+  const imageUrl = getProductImageUrl(product.image);
+
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [imageUrl]);
+
+  const initial = String(product.name || "P")
+    .charAt(0)
+    .toUpperCase();
+
+  return (
+    <div className="gz-product-photo">
+      {imageUrl && !imageFailed ? (
+        <img
+          key={imageUrl}
+          src={imageUrl}
+          alt={product.name || "Product photo"}
+          loading="lazy"
+          decoding="async"
+          onError={() => setImageFailed(true)}
+        />
+      ) : (
+        <span aria-hidden="true">
+          {initial}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/* ==========================================
+   INITIAL FILTERS
+========================================== */
+
 const initialFilters = {
   size: "All",
   colour: "All",
   stock: "All"
 };
+
+/* ==========================================
+   MAIN PRODUCTS VIEW
+========================================== */
 
 export default function ProductsView({
   title,
@@ -38,10 +142,20 @@ export default function ProductsView({
   const operation = useRef(false);
   const readVersion = useRef(0);
 
+  /* ==========================================
+     SESSION VALIDATION
+  ========================================== */
+
   function sameSession(token) {
-    return alive.current &&
-      token === sessionStorage.getItem("genzi_api_token");
+    return (
+      alive.current &&
+      token === sessionStorage.getItem("genzi_api_token")
+    );
   }
+
+  /* ==========================================
+     LOAD PRODUCTS AND CATEGORIES
+  ========================================== */
 
   async function refresh() {
     if (operation.current) return;
@@ -61,7 +175,9 @@ export default function ProductsView({
       if (
         !sameSession(token) ||
         version !== readVersion.current
-      ) return;
+      ) {
+        return;
+      }
 
       setProducts(nextProducts);
       setCategories(nextCategories);
@@ -84,6 +200,7 @@ export default function ProductsView({
 
   useEffect(() => {
     alive.current = true;
+
     refresh();
 
     return () => {
@@ -91,6 +208,10 @@ export default function ProductsView({
       readVersion.current += 1;
     };
   }, []);
+
+  /* ==========================================
+     OPEN ADD / EDIT PRODUCT
+  ========================================== */
 
   async function openEditor(id) {
     if (operation.current || loading) return;
@@ -119,16 +240,27 @@ export default function ProductsView({
 
       setEditor({ product });
     } catch (failure) {
-      if (sameSession(token)) setError(failure.message);
+      if (sameSession(token)) {
+        setError(failure.message);
+      }
     } finally {
       operation.current = false;
-      if (alive.current) setBusy(false);
+
+      if (alive.current) {
+        setBusy(false);
+      }
     }
   }
 
+  /* ==========================================
+     SAVE PRODUCT
+  ========================================== */
+
   async function submitProduct(payload, id) {
     if (operation.current) {
-      throw new Error("Wait for the current operation to finish.");
+      throw new Error(
+        "Wait for the current operation to finish."
+      );
     }
 
     operation.current = true;
@@ -142,9 +274,15 @@ export default function ProductsView({
       if (!sameSession(token)) return;
 
       setProducts(current => {
-        const next = current.filter(item => item.id !== saved.id);
+        const next = current.filter(
+          item => item.id !== saved.id
+        );
+
         next.push(saved);
-        return next.sort((a, b) => a.name.localeCompare(b.name));
+
+        return next.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
       });
 
       setError("");
@@ -159,9 +297,16 @@ export default function ProductsView({
       });
     } finally {
       operation.current = false;
-      if (alive.current) setBusy(false);
+
+      if (alive.current) {
+        setBusy(false);
+      }
     }
   }
+
+  /* ==========================================
+     DELETE PRODUCT
+  ========================================== */
 
   async function remove(product) {
     if (operation.current || loading) return;
@@ -181,14 +326,21 @@ export default function ProductsView({
         confirmButtonColor: "#dc2626"
       });
 
-      if (!confirmation.isConfirmed || !sameSession(token)) return;
+      if (
+        !confirmation.isConfirmed ||
+        !sameSession(token)
+      ) {
+        return;
+      }
 
       await deleteProduct(product.id);
 
       if (!sameSession(token)) return;
 
       setProducts(current =>
-        current.filter(item => item.id !== product.id)
+        current.filter(
+          item => item.id !== product.id
+        )
       );
 
       setError("");
@@ -205,11 +357,20 @@ export default function ProductsView({
       }
     } finally {
       operation.current = false;
-      if (alive.current) setBusy(false);
+
+      if (alive.current) {
+        setBusy(false);
+      }
     }
   }
 
-  const search = query.trim().toLowerCase();
+  /* ==========================================
+     SEARCH AND FILTER PRODUCTS
+  ========================================== */
+
+  const search = String(query || "")
+    .trim()
+    .toLowerCase();
 
   const visible = products.filter(product => {
     const matchesSearch = [
@@ -220,18 +381,25 @@ export default function ProductsView({
       product.size,
       product.colour
     ].some(value =>
-      String(value || "").toLowerCase().includes(search)
+      String(value || "")
+        .toLowerCase()
+        .includes(search)
     );
 
     const matchesSize =
-      filters.size === "All" || product.size === filters.size;
+      filters.size === "All" ||
+      product.size === filters.size;
 
     const matchesColour =
-      filters.colour === "All" || product.colour === filters.colour;
+      filters.colour === "All" ||
+      product.colour === filters.colour;
 
     const matchesStock =
       filters.stock === "All" ||
-      (filters.stock === "In stock" && product.stock > 0) ||
+      (
+        filters.stock === "In stock" &&
+        product.stock > 0
+      ) ||
       (
         filters.stock === "Low stock" &&
         product.stock > 0 &&
@@ -242,11 +410,17 @@ export default function ProductsView({
         product.stock === 0
       );
 
-    return matchesSearch &&
+    return (
+      matchesSearch &&
       matchesSize &&
       matchesColour &&
-      matchesStock;
+      matchesStock
+    );
   });
+
+  /* ==========================================
+     EXPORT PRODUCT CATALOGUE
+  ========================================== */
 
   function exportProducts() {
     const headers = [
@@ -280,41 +454,61 @@ export default function ProductsView({
     function csvCell(value) {
       let text = String(value ?? "");
 
-      // Prevent spreadsheet formulas from product text.
-      if (/^[=+\-@\t\r\n]/.test(text)) text = "'" + text;
+      // Prevent spreadsheet formula injection.
+      if (/^[=+\-@\t\r\n]/.test(text)) {
+        text = "'" + text;
+      }
 
       return `"${text.replaceAll('"', '""')}"`;
     }
 
-    const csv = "\uFEFF" + [headers, ...rows]
-      .map(row => row.map(csvCell).join(","))
-      .join("\r\n");
+    const csv =
+      "\uFEFF" +
+      [headers, ...rows]
+        .map(row => row.map(csvCell).join(","))
+        .join("\r\n");
 
     const url = URL.createObjectURL(
-      new Blob([csv], { type: "text/csv;charset=utf-8" })
+      new Blob([csv], {
+        type: "text/csv;charset=utf-8"
+      })
     );
 
     const link = document.createElement("a");
+
     link.href = url;
     link.download = "genzi-products.csv";
     link.click();
 
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
   }
 
-    return (
+  /* ==========================================
+     RENDER PRODUCTS PAGE
+  ========================================== */
+
+  return (
     <section className="gz-products">
       {title(
         "Products & Variants",
         "Manage your collection, product variants and stock."
       )}
 
+      {/* PRODUCT TOOLBAR */}
+
       <div className="gz-products-toolbar">
         <div className="gz-products-toolbar-copy">
-          <span className="gz-products-eyebrow">YOUR COLLECTION</span>
+          <span className="gz-products-eyebrow">
+            YOUR COLLECTION
+          </span>
+
           <strong>
             {visible.length}
-            <span> of {products.length} products</span>
+            <span>
+              {" "}of {products.length} products
+            </span>
           </strong>
         </div>
 
@@ -327,8 +521,11 @@ export default function ProductsView({
           >
             <RefreshCw
               size={16}
-              className={loading ? "gz-products-spin" : ""}
+              className={
+                loading ? "gz-products-spin" : ""
+              }
             />
+
             {loading ? "Loading..." : "Refresh"}
           </button>
 
@@ -344,11 +541,18 @@ export default function ProductsView({
         </div>
       </div>
 
+      {/* ERROR MESSAGE */}
+
       {error && (
-        <div className="gz-products-error" role="alert">
+        <div
+          className="gz-products-error"
+          role="alert"
+        >
           {error}
         </div>
       )}
+
+      {/* CATALOGUE FILTERS */}
 
       <CatalogueTools
         products={products}
@@ -357,24 +561,46 @@ export default function ProductsView({
         exportProducts={exportProducts}
       />
 
+      {/* LOADING STATE */}
+
       {loading ? (
-        <div className="gz-products-loading" role="status">
-          <RefreshCw size={23} className="gz-products-spin" />
-          <strong>Loading your collection</strong>
-          <span>Please wait while products are loaded.</span>
+        <div
+          className="gz-products-loading"
+          role="status"
+        >
+          <RefreshCw
+            size={23}
+            className="gz-products-spin"
+          />
+
+          <strong>
+            Loading your collection
+          </strong>
+
+          <span>
+            Please wait while products are loaded.
+          </span>
         </div>
       ) : (
         <div className="gz-products-table-card">
+
+          {/* TABLE HEADING */}
+
           <div className="gz-products-table-heading">
             <div>
               <h3>Product catalogue</h3>
-              <p>Prices, variants and inventory in one place.</p>
+
+              <p>
+                Prices, variants and inventory in one place.
+              </p>
             </div>
 
             <span className="gz-products-count">
               {visible.length} products
             </span>
           </div>
+
+          {/* PRODUCT TABLE */}
 
           <div
             className="gz-products-table-scroll"
@@ -399,7 +625,10 @@ export default function ProductsView({
                     "Reorder",
                     "Actions"
                   ].map(heading => (
-                    <th key={heading} scope="col">
+                    <th
+                      key={heading}
+                      scope="col"
+                    >
                       {heading}
                     </th>
                   ))}
@@ -409,30 +638,29 @@ export default function ProductsView({
               <tbody>
                 {visible.map(product => (
                   <tr key={product.id}>
+
+                    {/* PRODUCT IMAGE AND NAME */}
+
                     <td>
                       <div className="gz-product-identity">
-                        <div className="gz-product-photo">
-                          {product.image ? (
-                            <img
-                              src={product.image}
-                              alt=""
-                              loading="lazy"
-                            />
-                          ) : (
-                            <span aria-hidden="true">
-                              {String(product.name || "P")
-                                .charAt(0)
-                                .toUpperCase()}
-                            </span>
-                          )}
-                        </div>
+
+                        <ProductPhoto
+                          product={product}
+                        />
 
                         <div className="gz-product-name">
-                          <strong>{product.name}</strong>
-                          <small>{product.category || "Product"}</small>
+                          <strong>
+                            {product.name}
+                          </strong>
+
+                          <small>
+                            {product.category || "Product"}
+                          </small>
                         </div>
                       </div>
                     </td>
+
+                    {/* SKU */}
 
                     <td>
                       <span className="gz-product-sku">
@@ -440,22 +668,49 @@ export default function ProductsView({
                       </span>
                     </td>
 
-                    <td>{product.category}</td>
-                    <td>{product.brand || "—"}</td>
-                    <td>{product.size || "—"}</td>
-                    <td>{product.colour || "—"}</td>
+                    {/* CATEGORY */}
+
+                    <td>
+                      {product.category}
+                    </td>
+
+                    {/* BRAND */}
+
+                    <td>
+                      {product.brand || "—"}
+                    </td>
+
+                    {/* SIZE */}
+
+                    <td>
+                      {product.size || "—"}
+                    </td>
+
+                    {/* COLOUR */}
+
+                    <td>
+                      {product.colour || "—"}
+                    </td>
+
+                    {/* SELLING PRICE */}
 
                     <td className="gz-product-price">
                       {money(product.price)}
                     </td>
 
+                    {/* COST */}
+
                     <td className="gz-product-cost">
                       {money(product.cost)}
                     </td>
 
+                    {/* OPENING STOCK */}
+
                     <td className="gz-product-number">
                       {product.openingStock}
                     </td>
+
+                    {/* CURRENT STOCK */}
 
                     <td>
                       <span
@@ -468,14 +723,22 @@ export default function ProductsView({
                         }`}
                       >
                         <span aria-hidden="true" />
+
                         {product.stock}
-                        {product.stock === 0 ? " · Out of stock" : ""}
+
+                        {product.stock === 0
+                          ? " · Out of stock"
+                          : ""}
                       </span>
                     </td>
+
+                    {/* REORDER LEVEL */}
 
                     <td className="gz-product-number">
                       {product.reorderLevel}
                     </td>
+
+                    {/* ACTION BUTTONS */}
 
                     <td>
                       <div className="gz-product-actions">
@@ -485,7 +748,9 @@ export default function ProductsView({
                           aria-label={`Edit ${product.name}`}
                           title="Edit product"
                           disabled={busy}
-                          onClick={() => openEditor(product.id)}
+                          onClick={() =>
+                            openEditor(product.id)
+                          }
                         >
                           <Pencil size={16} />
                         </button>
@@ -496,7 +761,9 @@ export default function ProductsView({
                           aria-label={`Delete ${product.name}`}
                           title="Delete product"
                           disabled={busy}
-                          onClick={() => remove(product)}
+                          onClick={() =>
+                            remove(product)
+                          }
                         >
                           <Trash2 size={16} />
                         </button>
@@ -505,9 +772,14 @@ export default function ProductsView({
                   </tr>
                 ))}
 
+                {/* EMPTY PRODUCT STATE */}
+
                 {!visible.length && (
                   <tr>
-                    <td colSpan={12} className="gz-products-empty-cell">
+                    <td
+                      colSpan={12}
+                      className="gz-products-empty-cell"
+                    >
                       <div className="gz-products-empty">
                         <span className="gz-products-empty-symbol">
                           <Plus size={25} />
@@ -532,16 +804,29 @@ export default function ProductsView({
             </table>
           </div>
 
+          {/* TABLE FOOTER */}
+
           <div className="gz-products-table-footer">
             <span>
-              Showing <strong>{visible.length}</strong> of{" "}
-              <strong>{products.length}</strong> products
+              Showing{" "}
+              <strong>
+                {visible.length}
+              </strong>{" "}
+              of{" "}
+              <strong>
+                {products.length}
+              </strong>{" "}
+              products
             </span>
 
-            <small>Scroll horizontally to view every column</small>
+            <small>
+              Scroll horizontally to view every column
+            </small>
           </div>
         </div>
       )}
+
+      {/* ADD / EDIT PRODUCT MODAL */}
 
       {editor && (
         <ProductForm
