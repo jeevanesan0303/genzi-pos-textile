@@ -20,7 +20,7 @@ import dashboardRoutes from "./routes/dashboard.js";
 import settingsRoutes from "./routes/settings.js";
 import accountRoutes from "./routes/account.js";
 import permissionsRoutes from "./routes/permissions.js";
-
+import receiptSmsRoutes from "./routes/receiptSms.js";
 const app = express();
 
 app.disable("x-powered-by");
@@ -89,6 +89,7 @@ app.use("/api/settings", settingsRoutes);
 
 app.use(express.json({ limit: "128kb" }));
 
+app.use("/api/receipts", receiptSmsRoutes);
 /* ==========================================
    ACCOUNT AND PERMISSIONS
 ========================================== */
