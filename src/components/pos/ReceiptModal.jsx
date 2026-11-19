@@ -4,7 +4,7 @@ import Modal from "../common/Modal";
 import ReceiptFooter from "./ReceiptFooter";
 import { returnStatus } from "../../exchange";
 import { refundTotal } from "../../returns";
-
+import ReceiptSms from "./ReceiptSms";
 export default function ReceiptModal({
   close,
   data,
@@ -1066,7 +1066,7 @@ export default function ReceiptModal({
         </p>
       )}
 
-      <div className="gr-receipt-actions gr-no-print">
+            <div className="gr-receipt-actions gr-no-print">
         <button
           ref={printButtonRef}
           type="button"
@@ -1075,22 +1075,22 @@ export default function ReceiptModal({
           onClick={() => void printCurrentReceipt()}
         >
           <Printer size={17} />
+
           {printing
             ? "Preparing receipt…"
-            : "Print receipt · Enter"}
+            : "Print Bill · Enter"}
         </button>
 
-        <button
-          type="button"
-          className="secondary full"
-          disabled={saving || printing}
-          onClick={safeClose}
-        >
-          Close · Esc
-        </button>
+        <ReceiptSms
+          key={sale.id}
+          sale={sale}
+          printing={printing}
+          saving={saving}
+          onSent={close}
+        />
 
         <p className="gr-receipt-shortcuts">
-          Enter: print receipt · Esc: close preview
+          Enter: print bill · Esc: close preview
         </p>
       </div>
     </Modal>
