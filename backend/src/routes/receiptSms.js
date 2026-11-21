@@ -529,11 +529,12 @@ router.post(
         `${origin}/api/receipts/view/${links[0].token}`;
 
         const message = [
-        "Hello!😊",
+        "Hello,",
         "Thank you for shopping with Gen Zi Corner !! ",
         `Bill No: ${receiptNumber(sale.number)}`,
         `Total: Rs. ${Number(sale.total).toFixed(2)}`,
-        `Receipt: ${link}`
+        `View your e-receipt here for your today’s purchase.
+         ${link}`
         ].join("\n");
 
       const response = await fetch(
