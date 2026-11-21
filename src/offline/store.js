@@ -300,14 +300,30 @@ export async function offlineSubmit(body, send) {
         JSON.stringify(old.body) !== JSON.stringify(body)
       )
         throw new Error("Request identity mismatch.");
-      return { order: old.order };
+            return { order: old.order };
     }
+
+    // Online checkout uses the server directly.
+    // Existing queued requests above keep their original identity.
+    if (navigator.onLine !== false && !isOfflineSession()) {
+      return send(body);
+    }
+
     const catalogue = await offlineBootstrap(async () => {
       const e = new Error();
       e.network = true;
       throw e;
     });
-    const order = provisional(body, catalogue);
+        let order;
+
+    try {
+      order = provisional(body, catalogue);
+    } catch (error) {
+      // Validation failed before queuing or sending this request.
+      error.status = 400;
+      error.uncertain = false;
+      throw error;
+    }
     active(key, token);
     await put("queue", {
       key: body.requestKey,
